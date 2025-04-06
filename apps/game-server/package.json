@@ -4,14 +4,12 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
+    "dev": "partykit dev",
+    "deploy": "partykit deploy"
   },
   "devDependencies": {
     "@types/node": "^20.9.0",
-    "typescript": "^5.2.2",
-    "vite": "^5.0.0"
+    "typescript": "^5.2.2"
   },
   "dependencies": {
     "partykit": "^0.0.114",

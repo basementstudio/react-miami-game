@@ -7,6 +7,8 @@ dist
 build
 .next
 out
+.turbo
+.partykit
 
 # Environment variables
 .env

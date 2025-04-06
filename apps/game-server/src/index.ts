@@ -17,7 +17,7 @@ const PlayerDataSchema = z.object({
 
 type PlayerData = z.infer<typeof PlayerDataSchema>;
 
-// Actions
+// Actions (client -> server)
 const UpdatePositionSchema = PlayerDataSchema.pick({
   position: true,
   rotation: true,
@@ -33,11 +33,41 @@ const InitPlayerSchema = PlayerDataSchema.pick({
   type: z.literal("init-player"),
 });
 
+// Messages (server -> client)
+const PresenceSchema = z.object({
+  type: z.literal("presence"),
+  payload: z.object({
+    users: z.array(PlayerDataSchema),
+  }),
+});
+
+type PresenceMessage = z.infer<typeof PresenceSchema>;
+
+
 export default class GameServer implements Party.Server {
   constructor(readonly room: Party.Room) { }
 
   public onConnect(connection: Party.Connection, ctx: Party.ConnectionContext): void | Promise<void> {
+    this.updateUsers();
+  }
 
+  updateUsers() {
+    const presenceMessage = JSON.stringify(this.getPresenceMessage());
+    for (const connection of this.room.getConnections<PlayerData>()) {
+      connection.send(presenceMessage);
+    }
+  }
+
+  getPresenceMessage(): PresenceMessage {
+    const users = new Map<string, PlayerData>();
+    for (const connection of this.room.getConnections<PlayerData>()) {
+      const userState = connection.state;
+      if (userState) users.set(connection.id, userState);
+    }
+    return {
+      type: "presence",
+      payload: { users: Array.from(users.values()) },
+    }
   }
 
   public onMessage(message: string, sender: Party.Connection<PlayerData>) {
@@ -60,6 +90,8 @@ export default class GameServer implements Party.Server {
         rotation,
       })
 
+      this.updateUsers();
+
       return;
     }
     const updatePosition = UpdatePositionSchema.safeParse(messageJson);
@@ -77,8 +109,14 @@ export default class GameServer implements Party.Server {
 
       return;
     }
+  }
 
+  onClose() {
+    this.updateUsers();
+  }
 
+  onError() {
+    this.updateUsers();
   }
 }
 
