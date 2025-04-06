@@ -44,8 +44,6 @@ export function OtherPlayers() {
             Presence
           >;
 
-          // console.log(presenceMessage);
-
           const selfId = party.id;
 
           presenceRef.current = presenceMessage;
@@ -80,8 +78,6 @@ export function OtherPlayers() {
       controller.abort();
     };
   }, [party]);
-
-  console.log("pids", playerIds);
 
   return (
     <>
