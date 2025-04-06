@@ -2,20 +2,20 @@
 
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
-import { useEffect, useRef } from "react";
+import { forwardRef, useEffect } from "react";
 import { Mesh } from "three";
 import usePartySocket from "partysocket/react";
 
-function Cube() {
-  const meshRef = useRef<Mesh>(null);
-
+const Cube = forwardRef<Mesh>((_, ref) => {
   return (
-    <mesh ref={meshRef} castShadow>
+    <mesh ref={ref} castShadow>
       <boxGeometry args={[1, 1, 1]} />
       <meshPhysicalMaterial color="green" roughness={0.7} metalness={0.5} />
     </mesh>
   );
-}
+});
+
+Cube.displayName = "Cube";
 
 function Game() {
   const socket = usePartySocket({
