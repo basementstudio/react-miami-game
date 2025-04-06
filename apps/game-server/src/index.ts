@@ -17,6 +17,10 @@ const PlayerDataSchema = z.object({
 
 type PlayerData = z.infer<typeof PlayerDataSchema>;
 
+// real player state, can be null
+type PlayerState = PlayerData | null
+
+
 // Actions (client -> server)
 const UpdatePositionSchema = PlayerDataSchema.pick({
   position: true,
@@ -60,7 +64,7 @@ export default class GameServer implements Party.Server {
 
   getPresenceMessage(): PresenceMessage {
     const users = new Map<string, PlayerData>();
-    for (const connection of this.room.getConnections<PlayerData>()) {
+    for (const connection of this.room.getConnections<PlayerState>()) {
       const userState = connection.state;
       if (userState) users.set(connection.id, userState);
     }
@@ -70,7 +74,7 @@ export default class GameServer implements Party.Server {
     }
   }
 
-  public onMessage(message: string, sender: Party.Connection<PlayerData>) {
+  public onMessage(message: string, sender: Party.Connection<PlayerState>) {
     // // send the message to all connected clients
     // for (const conn of this.room.getConnections()) {
     //   if (conn.id !== sender.id) {
@@ -80,6 +84,7 @@ export default class GameServer implements Party.Server {
 
     const messageJson = JSON.parse(message);
 
+    // init player
     const initPlayer = InitPlayerSchema.safeParse(messageJson);
     if (initPlayer.success) {
       const { name, position, rotation } = initPlayer.data;
@@ -91,22 +96,22 @@ export default class GameServer implements Party.Server {
       })
 
       this.updateUsers();
-
       return;
     }
+
+    // update player position
     const updatePosition = UpdatePositionSchema.safeParse(messageJson);
     if (updatePosition.success) {
       const { position, rotation } = updatePosition.data;
 
       sender.setState((prevState) => {
-        if (!prevState) throw new Error("No state");
+        if (!prevState) return null;
         return {
           ...prevState,
           position,
           rotation,
         }
       })
-
       return;
     }
   }
