@@ -39,9 +39,9 @@ const InitPlayerSchema = PlayerDataSchema.pick({
 
 // Messages (server -> client)
 const PresenceSchema = z.object({
-  type: z.literal("presence"),
+  type: z.literal("update-presence"),
   payload: z.object({
-    users: z.array(PlayerDataSchema),
+    users: z.record(z.string(), PlayerDataSchema),
   }),
 });
 
@@ -63,14 +63,14 @@ export default class GameServer implements Party.Server {
   }
 
   getPresenceMessage(): PresenceMessage {
-    const users = new Map<string, PlayerData>();
+    const users: Record<string, PlayerData> = {};
     for (const connection of this.room.getConnections<PlayerState>()) {
       const userState = connection.state;
-      if (userState) users.set(connection.id, userState);
+      if (userState) users[connection.id] = userState;
     }
     return {
-      type: "presence",
-      payload: { users: Array.from(users.values()) },
+      type: "update-presence",
+      payload: { users },
     }
   }
 
@@ -112,6 +112,7 @@ export default class GameServer implements Party.Server {
           rotation,
         }
       })
+      this.updateUsers();
       return;
     }
   }
