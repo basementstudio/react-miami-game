@@ -57,7 +57,7 @@ function Game() {
   }, [socket]);
 
   return (
-    <Physics debug>
+    <Physics>
       <KeyboardControls map={controlMap}>
         <PartyProvider socket={socket}>
           <ambientLight intensity={0.5} />
