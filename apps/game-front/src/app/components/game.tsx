@@ -11,6 +11,8 @@ import usePartySocket from "partysocket/react";
 import { Player } from "./player";
 import { PartyProvider } from "./use-party";
 import { OtherPlayers } from "./other-players";
+import { Physics } from "@react-three/rapier";
+import { Ground } from "./ground";
 
 export enum GameControls {
   forward = "forward",
@@ -52,24 +54,23 @@ function Game() {
   }, [socket]);
 
   return (
-    <KeyboardControls map={controlMap}>
-      <PartyProvider socket={socket}>
-        <ambientLight intensity={0.5} />
-        <pointLight
-          castShadow
-          position={[10, 10, 10]}
-          intensity={500}
-          distance={300}
-        />
-        <Player />
-        <OtherPlayers />
-        <mesh receiveShadow position={[0, -0.5, 0]} rotation-x={-Math.PI / 2}>
-          <planeGeometry args={[100, 100]} />
-          <meshPhysicalMaterial color="white" roughness={0.9} metalness={0} />
-        </mesh>
-        <OrbitControls />
-      </PartyProvider>
-    </KeyboardControls>
+    <Physics debug>
+      <KeyboardControls map={controlMap}>
+        <PartyProvider socket={socket}>
+          <ambientLight intensity={0.5} />
+          <pointLight
+            castShadow
+            position={[10, 10, 10]}
+            intensity={500}
+            distance={300}
+          />
+          <Player />
+          <OtherPlayers />
+          <Ground />
+          <OrbitControls />
+        </PartyProvider>
+      </KeyboardControls>
+    </Physics>
   );
 }
 
