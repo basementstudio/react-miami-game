@@ -9,10 +9,17 @@ const Vector3Schema = z.object({
   z: z.number(),
 });
 
+const QuaternionSchema = z.object({
+  x: z.number(),
+  y: z.number(),
+  z: z.number(),
+  w: z.number(),
+});
+
 const PlayerDataSchema = z.object({
   name: z.string(),
   position: Vector3Schema,
-  rotation: Vector3Schema,
+  rotation: QuaternionSchema,
 });
 
 type PlayerData = z.infer<typeof PlayerDataSchema>;

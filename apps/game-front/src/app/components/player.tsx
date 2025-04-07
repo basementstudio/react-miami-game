@@ -1,45 +1,22 @@
-import { Mesh, Vector3 } from "three";
-import { Cube } from "./cube";
+import { Vector3, Group, Quaternion } from "three";
 import { useParty } from "./use-party";
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import { useKeyboardControls } from "@react-three/drei";
-import { GameControls } from "./game";
+import { Car } from "./vehicle";
 
 const playerPos = new Vector3(0, 0, 0);
-const playerRot = new Vector3(0, 0, 0);
+const playerRot = new Quaternion();
 
 export function Player() {
   const party = useParty();
 
-  const playerObjectRef = useRef<Mesh>(null);
-
-  const [, get] = useKeyboardControls<GameControls>();
-
-  useFrame(() => {
-    const forward = get().forward;
-    const back = get().back;
-    const left = get().left;
-    const right = get().right;
-
-    if (forward) {
-      playerPos.z -= 0.01;
-    }
-    if (back) {
-      playerPos.z += 0.01;
-    }
-    if (left) {
-      playerPos.x -= 0.01;
-    }
-    if (right) {
-      playerPos.x += 0.01;
-    }
-  });
+  const playerObjectRef = useRef<Group | null>(null);
 
   useFrame(() => {
     if (!playerObjectRef.current) return;
 
-    playerObjectRef.current.position.copy(playerPos);
+    playerObjectRef.current.getWorldPosition(playerPos);
+    playerObjectRef.current.getWorldQuaternion(playerRot);
 
     party.send(
       JSON.stringify({
@@ -53,6 +30,7 @@ export function Player() {
           x: playerRot.x,
           y: playerRot.y,
           z: playerRot.z,
+          w: playerRot.w,
         },
       })
     );
@@ -60,7 +38,7 @@ export function Player() {
 
   return (
     <>
-      <Cube ref={playerObjectRef} />
+      <Car ref={playerObjectRef} />
     </>
   );
 }

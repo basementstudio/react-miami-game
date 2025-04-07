@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParty } from "./use-party";
-import { Mesh } from "three";
-import { Cube } from "./cube";
+import { Group } from "three";
 import { useFrame } from "@react-three/fiber";
+import { CarBody } from "./vehicle";
 
 interface Presence {
   name: string;
@@ -15,6 +15,7 @@ interface Presence {
     x: number;
     y: number;
     z: number;
+    w: number;
   };
 }
 
@@ -89,7 +90,7 @@ export function OtherPlayers() {
 }
 
 function OtherPlayer({ id }: { id: string }) {
-  const playerRef = useRef<Mesh>(null);
+  const playerRef = useRef<Group>(null);
 
   useFrame(() => {
     const presence = presenceRef.current[id];
@@ -102,12 +103,23 @@ function OtherPlayer({ id }: { id: string }) {
       presence.position.y,
       presence.position.z
     );
-    playerRef.current.rotation.set(
+    playerRef.current.quaternion.set(
       presence.rotation.x,
       presence.rotation.y,
-      presence.rotation.z
+      presence.rotation.z,
+      presence.rotation.w
     );
   });
 
-  return <Cube ref={playerRef} />;
+  const vectors = useMemo(
+    () => ({
+      wheelRotation: { current: 0 },
+      steeringInput: { current: 0 },
+    }),
+    []
+  );
+
+  console.log({ id });
+
+  return <CarBody ref={playerRef} v={vectors} />;
 }
