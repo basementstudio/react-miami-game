@@ -2,7 +2,7 @@ import { Vector3, Group } from "three";
 import { useParty } from "./use-party";
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import { Vehicle } from "./vehicle";
+import { Car } from "./vehicle";
 
 const playerPos = new Vector3(0, 0, 0);
 const playerRot = new Vector3(0, 0, 0);
@@ -58,7 +58,7 @@ export function Player() {
 
   return (
     <>
-      <Vehicle ref={playerObjectRef} />
+      <Car />
     </>
   );
 }

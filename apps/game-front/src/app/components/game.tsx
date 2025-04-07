@@ -19,6 +19,7 @@ export enum GameControls {
   back = "back",
   left = "left",
   right = "right",
+  drift = "drift",
 }
 
 const controlMap = [
@@ -26,6 +27,7 @@ const controlMap = [
   { name: GameControls.back, keys: ["ArrowDown", "KeyS"] },
   { name: GameControls.left, keys: ["ArrowLeft", "KeyA"] },
   { name: GameControls.right, keys: ["ArrowRight", "KeyD"] },
+  { name: GameControls.drift, keys: ["Space"] },
 ] satisfies KeyboardControlsEntry<GameControls>[];
 
 function Game() {
