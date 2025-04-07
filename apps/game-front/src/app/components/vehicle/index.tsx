@@ -220,6 +220,7 @@ export const Car = forwardRef<THREE.Group, RigidBodyProps>((props, ref) => {
 
   useFrame((_, delta) => {
     // body position
+    if (!bodyRef.current) return;
     const bodyPosition = _bodyPosition.copy(bodyRef.current.translation());
     groupRef.current.position.copy(bodyPosition);
     groupRef.current.quaternion.copy(steeringAngleQuat.current);
@@ -280,52 +281,56 @@ export const Car = forwardRef<THREE.Group, RigidBodyProps>((props, ref) => {
   );
 });
 
-function CarBody({ v }: { v: VehicleVectors }) {
-  const wheelsRef = useRef<(THREE.Object3D | null)[]>([]);
+export const CarBody = forwardRef<THREE.Group, { v: VehicleVectors }>(
+  ({ v }, ref) => {
+    const wheelsRef = useRef<(THREE.Object3D | null)[]>([]);
 
-  useFrame(() => {
-    wheelsRef.current.forEach((wheel) => {
-      if (!wheel) return;
+    useFrame(() => {
+      wheelsRef.current.forEach((wheel) => {
+        if (!wheel) return;
 
-      wheel.rotation.order = "YXZ";
-      wheel.rotation.x = v.wheelRotation.current;
+        wheel.rotation.order = "YXZ";
+        wheel.rotation.x = v.wheelRotation.current;
+      });
+
+      wheelsRef.current[1]!.rotation.y = v.steeringInput.current * 0.5;
+      wheelsRef.current[0]!.rotation.y = v.steeringInput.current * 0.5;
     });
 
-    wheelsRef.current[1]!.rotation.y = v.steeringInput.current * 0.5;
-    wheelsRef.current[0]!.rotation.y = v.steeringInput.current * 0.5;
-  });
+    return (
+      <group ref={ref}>
+        <mesh>
+          <boxGeometry args={[CAR.WIDTH, CAR.HEIGHT, CAR.LENGTH]} />
+          <meshBasicMaterial color="#fff" />
+        </mesh>
 
-  return (
-    <>
-      <mesh>
-        <boxGeometry args={[CAR.WIDTH, CAR.HEIGHT, CAR.LENGTH]} />
-        <meshBasicMaterial color="#fff" />
-      </mesh>
-
-      {wheels.map((wheel, index) => (
-        <group
-          key={index}
-          ref={(ref) => (wheelsRef.current[index] = ref)}
-          position={wheel.position}
-        >
-          <group rotation-z={-Math.PI / 2}>
-            <mesh>
-              <cylinderGeometry
-                args={[WHEEL.RADIUS, WHEEL.RADIUS, WHEEL.WIDTH, 16]}
-              />
-              <meshStandardMaterial color="#222" />
-            </mesh>
-            <mesh scale={1.01}>
-              <cylinderGeometry
-                args={[WHEEL.RADIUS, WHEEL.RADIUS, WHEEL.WIDTH, 6]}
-              />
-              <meshStandardMaterial color="#fff" wireframe />
-            </mesh>
+        {wheels.map((wheel, index) => (
+          <group
+            key={index}
+            ref={(ref) => (wheelsRef.current[index] = ref)}
+            position={wheel.position}
+          >
+            <group rotation-z={-Math.PI / 2}>
+              <mesh>
+                <cylinderGeometry
+                  args={[WHEEL.RADIUS, WHEEL.RADIUS, WHEEL.WIDTH, 16]}
+                />
+                <meshStandardMaterial color="#222" />
+              </mesh>
+              <mesh scale={1.01}>
+                <cylinderGeometry
+                  args={[WHEEL.RADIUS, WHEEL.RADIUS, WHEEL.WIDTH, 6]}
+                />
+                <meshStandardMaterial color="#fff" wireframe />
+              </mesh>
+            </group>
           </group>
-        </group>
-      ))}
-    </>
-  );
-}
+        ))}
+      </group>
+    );
+  }
+);
+
+CarBody.displayName = "CarBody";
 
 Car.displayName = "Car";
