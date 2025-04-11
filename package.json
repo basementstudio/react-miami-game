@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "turbo dev"
+    "dev": "turbo dev",
+    "ssl": "local-ssl-proxy --source 3001 --target 3000 --key localhost-key.pem --cert localhost.pem"
   },
   "devDependencies": {
     "prettier": "^3.5.3",
