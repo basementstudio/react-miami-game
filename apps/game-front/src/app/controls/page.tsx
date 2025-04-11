@@ -50,9 +50,22 @@ export default function ControlsPage() {
     if (!permissionGranted) return;
 
     const handleOrientation = (event: DeviceOrientationEvent) => {
-      const gamma = event.gamma;
-      if (gamma !== null && squareRef.current) {
-        const limitedRotation = Math.max(-90, Math.min(90, gamma));
+      let rotationValue: number | null = null;
+
+      // Use screen.orientation to check if landscape
+      const isLandscape = screen.orientation.type.startsWith("landscape");
+
+      if (isLandscape) {
+        // In landscape, use beta (front-back tilt) for steering
+        rotationValue = event.beta;
+      } else {
+        // In portrait, use gamma (left-right tilt) - optional fallback
+        rotationValue = event.gamma;
+      }
+
+      if (rotationValue !== null && squareRef.current) {
+        // Limit the rotation angle (adjust range if needed for steering feel)
+        const limitedRotation = Math.max(-90, Math.min(90, rotationValue));
         squareRef.current.style.transform = `rotate(${limitedRotation}deg)`;
       }
     };
@@ -103,6 +116,11 @@ export default function ControlsPage() {
       {permissionGranted && (
         <p style={{ marginTop: "10px" }}>Controls Enabled</p>
       )}
+      {/* Optional: Display orientation type */}
+      <p style={{ marginTop: "10px", fontSize: "0.8em" }}>
+        Orientation:{" "}
+        {typeof screen !== "undefined" ? screen.orientation.type : "N/A"}
+      </p>
     </div>
   );
 }
