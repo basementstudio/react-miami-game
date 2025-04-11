@@ -1,106 +1,133 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useRef, useEffect, useState } from "react"; // Import useState
+import { useDeviceOrientation } from "@/hooks/use-device-orientation";
+import { useCallback, useEffect, useRef, useState } from "react";
 
+// Component using the hook
 export default function ControlsPage() {
   const squareRef = useRef<HTMLDivElement>(null);
-  const [permissionGranted, setPermissionGranted] = useState(false); // Track permission state
-  const [error, setError] = useState<string | null>(null); // Track errors
+  const [orientationType, setOrientationType] =
+    useState<OrientationType | null>(null);
 
-  // Function to request permission (must be called by user gesture)
-  const requestDeviceOrientationPermission = async () => {
-    // Check if the specific permission API exists (mainly for iOS)
-    if (
-      typeof (DeviceOrientationEvent as any).requestPermission === "function"
-    ) {
-      try {
-        const permissionState = await (
-          DeviceOrientationEvent as any
-        ).requestPermission();
-        if (permissionState === "granted") {
-          setPermissionGranted(true);
-          setError(null); // Clear previous errors
-        } else {
-          setError("Permission denied.");
-          setPermissionGranted(false);
-        }
-      } catch (err) {
-        console.error(err);
-        setError(
-          `Error requesting permission: ${err instanceof Error ? err.message : String(err)}`
-        );
-        setPermissionGranted(false);
-      }
-    } else {
-      // For browsers/devices that don't require explicit permission (like Android Chrome over HTTPS)
-      // Assume permission is granted if the API exists, or handle it based on event firing
-      if (window.DeviceOrientationEvent) {
-        setPermissionGranted(true); // Assume granted if API exists and no request function
-        setError(null);
-      } else {
-        setError("Device Orientation API not supported.");
-        setPermissionGranted(false);
-      }
-    }
-  };
-
-  useEffect(() => {
-    // Only add the listener if permission has been granted
-    if (!permissionGranted) return;
-
-    const handleOrientation = (event: DeviceOrientationEvent) => {
+  const handleOrientationUpdate = useCallback(
+    (event: DeviceOrientationEvent) => {
       let rotationValue: number | null = null;
+      const currentOrientation =
+        typeof screen !== "undefined"
+          ? screen.orientation.type
+          : "portrait-primary"; // Default or read
+      setOrientationType(currentOrientation); // Update orientation type state
 
-      // Use screen.orientation to check if landscape
-      const isLandscape = screen.orientation.type.startsWith("landscape");
+      const isLandscape = currentOrientation.startsWith("landscape");
 
       if (isLandscape) {
-        // In landscape, use beta (front-back tilt) for steering
-        rotationValue = event.beta;
+        rotationValue = event.beta; // Use beta for landscape
       } else {
-        // In portrait, use gamma (left-right tilt) - optional fallback
-        rotationValue = event.gamma;
+        rotationValue = event.gamma; // Use gamma for portrait
       }
 
       if (rotationValue !== null && squareRef.current) {
-        // Limit the rotation angle (adjust range if needed for steering feel)
         const limitedRotation = Math.max(-90, Math.min(90, rotationValue));
         squareRef.current.style.transform = `rotate(${limitedRotation}deg)`;
       }
-    };
+    },
+    []
+  ); // No dependencies needed here as it reads screen orientation directly
 
-    window.addEventListener("deviceorientation", handleOrientation);
-    console.log("Device orientation listener added.");
+  const {
+    requestDeviceOrientation,
+    deviceOrientationStarted,
+    deviceOrientationError,
+  } = useDeviceOrientation({
+    onUpdate: handleOrientationUpdate,
+    onError: (err) => console.error("Device Orientation Hook Error:", err), // Optional: Handle errors from the hook
+    onStarted: () => console.log("Device Orientation Hook Started"), // Optional: Handle start event
+  });
 
-    // Cleanup function
-    return () => {
-      window.removeEventListener("deviceorientation", handleOrientation);
-      console.log("Device orientation listener removed.");
+  // Effect to update orientation type on change
+  useEffect(() => {
+    const updateOrientation = () => {
+      if (typeof screen !== "undefined") {
+        setOrientationType(screen.orientation.type);
+      }
     };
-    // Re-run effect if permissionGranted changes
-  }, [permissionGranted]);
+    if (typeof screen !== "undefined" && screen.orientation) {
+      screen.orientation.addEventListener("change", updateOrientation);
+      updateOrientation(); // Initial check
+      return () =>
+        screen.orientation.removeEventListener("change", updateOrientation);
+    }
+  }, []);
+
+  if (!deviceOrientationStarted || deviceOrientationError) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100svh",
+          textAlign: "center",
+        }}
+      >
+        {!deviceOrientationStarted && (
+          <button
+            onClick={requestDeviceOrientation}
+            style={{ marginBottom: "20px", padding: "10px 20px" }}
+          >
+            Enable Controls
+          </button>
+        )}
+        {deviceOrientationError && (
+          <p style={{ color: "red" }}>{deviceOrientationError}</p>
+        )}
+      </div>
+    );
+  }
+
+  const okOrientation =
+    orientationType && orientationType.startsWith("landscape");
+
+  if (!okOrientation) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100svh",
+          textAlign: "center",
+        }}
+      >
+        <p style={{ color: "red" }}>
+          Please rotate your device to landscape mode.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div
       style={{
         display: "flex",
-        flexDirection: "column", // Stack button and square
+        flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",
-        height: "100vh",
-        textAlign: "center", // Center text
+        height: "100svh",
+        textAlign: "center",
       }}
     >
-      {!permissionGranted && (
+      {!deviceOrientationStarted && (
         <button
-          onClick={requestDeviceOrientationPermission}
+          onClick={requestDeviceOrientation}
           style={{ marginBottom: "20px", padding: "10px 20px" }}
         >
           Enable Controls
         </button>
       )}
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {deviceOrientationError && (
+        <p style={{ color: "red" }}>{deviceOrientationError}</p>
+      )}
       <div
         ref={squareRef}
         style={{
@@ -108,19 +135,9 @@ export default function ControlsPage() {
           height: "100px",
           backgroundColor: "blue",
           transition: "transform 0.1s ease-out",
-          // Ensure initial state is visible even if no events fire immediately
           transform: "rotate(0deg)",
         }}
-      ></div>
-      {/* Optional: Display status for debugging */}
-      {permissionGranted && (
-        <p style={{ marginTop: "10px" }}>Controls Enabled</p>
-      )}
-      {/* Optional: Display orientation type */}
-      <p style={{ marginTop: "10px", fontSize: "0.8em" }}>
-        Orientation:{" "}
-        {typeof screen !== "undefined" ? screen.orientation.type : "N/A"}
-      </p>
+      />
     </div>
   );
 }
