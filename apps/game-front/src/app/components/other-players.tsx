@@ -115,11 +115,10 @@ function OtherPlayer({ id }: { id: string }) {
     () => ({
       wheelRotation: { current: 0 },
       steeringInput: { current: 0 },
+      visibleSteering: { current: 0 },
     }),
     []
   );
-
-  console.log({ id });
 
   return <CarBody ref={playerRef} v={vectors} />;
 }
