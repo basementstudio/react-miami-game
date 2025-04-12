@@ -13,6 +13,8 @@ import {
 import { forwardRef, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { GameControls } from "../game";
+import { valueRemap } from "@/lib/math";
+import { clamp } from "three/src/math/MathUtils.js";
 
 const up = new THREE.Vector3(0, 1, 0);
 const maxForwardSpeed = 5;
@@ -83,6 +85,7 @@ const _impulse = new THREE.Vector3();
 interface VehicleVectors {
   wheelRotation: { current: number };
   steeringInput: { current: number };
+  visibleSteering: { current: number };
 }
 
 export const Car = forwardRef<THREE.Group, RigidBodyProps>((props, ref) => {
@@ -95,6 +98,7 @@ export const Car = forwardRef<THREE.Group, RigidBodyProps>((props, ref) => {
     () => ({
       wheelRotation: { current: 0 },
       steeringInput: { current: 0 },
+      visibleSteering: { current: 0 },
     }),
     []
   );
@@ -133,13 +137,11 @@ export const Car = forwardRef<THREE.Group, RigidBodyProps>((props, ref) => {
 
     // steering angle
     vectors.steeringInput.current = Number(left) - Number(right);
+    vectors.visibleSteering.current = vectors.steeringInput.current;
     // udpate angle based on direction
     if (impulse.z > 0) {
       vectors.steeringInput.current *= -1;
     }
-
-    // update vehicle angle
-    steeringAngle.current += vectors.steeringInput.current * 0.02;
 
     // drifting controls
     if (!drift) {
@@ -180,14 +182,20 @@ export const Car = forwardRef<THREE.Group, RigidBodyProps>((props, ref) => {
     driftSteeringAngle.current = THREE.MathUtils.lerp(
       driftSteeringAngle.current,
       driftSteeringTarget,
-      0.5
+      0.1
     );
 
-    steeringAngle.current += driftSteeringAngle.current * 0.01;
-
-    steeringAngleQuat.current.setFromAxisAngle(up, steeringAngle.current);
-
-    impulse.applyQuaternion(steeringAngleQuat.current);
+    if (Math.abs(speed.current) > 0.1) {
+      let steeringMultiply = valueRemap(speed.current, 0.1, 0.9, 0, 1);
+      steeringMultiply = clamp(steeringMultiply, 0, 1);
+      // update vehicle angle
+      steeringAngle.current +=
+        vectors.steeringInput.current * 0.02 * steeringMultiply;
+      steeringAngle.current +=
+        driftSteeringAngle.current * 0.01 * steeringMultiply;
+      steeringAngleQuat.current.setFromAxisAngle(up, steeringAngle.current);
+      impulse.applyQuaternion(steeringAngleQuat.current);
+    }
 
     // acceleration and deceleration
     let speedTarget = 0;
@@ -293,8 +301,8 @@ export const CarBody = forwardRef<THREE.Group, { v: VehicleVectors }>(
         wheel.rotation.x = v.wheelRotation.current;
       });
 
-      wheelsRef.current[1]!.rotation.y = v.steeringInput.current * 0.5;
-      wheelsRef.current[0]!.rotation.y = v.steeringInput.current * 0.5;
+      wheelsRef.current[1]!.rotation.y = v.visibleSteering.current * 0.5;
+      wheelsRef.current[0]!.rotation.y = v.visibleSteering.current * 0.5;
     });
 
     return (
