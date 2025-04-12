@@ -1,13 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import { Gamepad2, Smartphone } from "lucide-react";
+import { Gamepad2, Loader2, Smartphone } from "lucide-react";
 import { Button } from "./ui/button";
 import { Dialog } from "./ui/dialog";
+import { controlsInstance } from "@/hooks/use-peer-controls";
 
 export function ControlsQrOverlay() {
   const [isOpen, setIsOpen] = useState(false);
+  const [qr, setQr] = useState<string | null>(null);
 
   function handleOpen() {
     setIsOpen(true);
@@ -16,6 +18,26 @@ export function ControlsQrOverlay() {
   function handleClose() {
     setIsOpen(false);
   }
+
+  useEffect(() => {
+    const onOpen = (id: string) => {
+      const windowUrl = new URL(window.location.href);
+      windowUrl.pathname = "/controls";
+      windowUrl.searchParams.set("id", id);
+      setQr(windowUrl.toString());
+    };
+    controlsInstance.on("open", onOpen);
+
+    const connectionCallback = () => {
+      setIsOpen(false);
+    };
+    controlsInstance.on("connection", connectionCallback);
+
+    return () => {
+      controlsInstance.off("connection", connectionCallback);
+      controlsInstance.off("open", onOpen);
+    };
+  }, []);
 
   return (
     <>
@@ -31,13 +53,19 @@ export function ControlsQrOverlay() {
       <Dialog open={isOpen} onClose={handleClose} containerClassName="w-fit">
         <div className="flex flex-col items-center">
           <div className="p-6 bg-zinc-900 rounded-lg shadow-inner">
-            <QRCodeSVG
-              value="test"
-              size={240}
-              level="H"
-              bgColor="#18181b"
-              fgColor="#e4e4e7"
-            />
+            {qr ? (
+              <QRCodeSVG
+                value={qr}
+                size={240}
+                level="H"
+                bgColor="#18181b"
+                fgColor="#e4e4e7"
+              />
+            ) : (
+              <div className="w-[240px] h-[240px] flex items-center justify-center">
+                <Loader2 className="w-8 h-8 animate-spin text-zinc-400" />
+              </div>
+            )}
           </div>
           <div className="flex justify-center items-center gap-2 text-white my-4">
             <Smartphone size={80} />

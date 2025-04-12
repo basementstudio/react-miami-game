@@ -81,6 +81,24 @@ export class PeerParty<PartyEvents extends Record<string, unknown>> {
     })
   }
 
+  addListener: EventEmitter<PeerPartyEvents>['addListener'] = (type, callback, context) => {
+    return this.EE.addListener(type, callback, context)
+  }
+
+  removeListener: EventEmitter<PeerPartyEvents>['removeListener'] = (type, callback, context) => {
+    return this.EE.removeListener(type, callback, context)
+  }
+
+  on: EventEmitter<PeerPartyEvents>['on'] = (type, callback, context) => {
+    return this.EE.on(type, callback, context)
+  }
+
+  off: EventEmitter<PeerPartyEvents>['off'] = (type, callback, context) => {
+    return this.EE.off(type, callback, context)
+  }
+
+
+
   destroy() {
     this.instance.destroy()
     this.EE.removeAllListeners()
