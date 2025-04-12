@@ -8,6 +8,7 @@ export type PeerPartyEvents = {
   'close': () => void
   'connection': (connection: DataConnection) => void
   'message': (payload: MessagePayload) => void
+  'error': (error: Error) => void
 }
 
 export type MessageType<T = string, D = unknown> = {
@@ -46,19 +47,40 @@ export class PeerParty<PartyEvents extends Record<string, unknown>> {
     this.instance.on('connection', (connection) => {
       this.EE.emit('connection', connection)
       this.connections[connection.peer] = connection
+
+      const onMessageCallback = (payload: unknown) => {
+        this.EE.emit('message', payload as any)
+      }
+      connection.on('data', onMessageCallback)
       // handle connection close
       connection.on('close', () => {
         delete this.connections[connection.peer]
       })
     })
+
+    this.instance.on('error', (error) => {
+      this.EE.emit('error', error)
+    })
   }
 
   connectToPeer(peerId: string) {
-    this.instance.connect(peerId)
+    const conn = this.instance.connect(peerId)
+    conn.on('open', () => {
+      this.connections[peerId] = conn
+    })
+    conn.on('error', (error) => {
+      this.EE.emit('error', error)
+    })
+    conn.on('close', () => {
+      delete this.connections[peerId]
+    })
   }
 
   onMessage<T extends keyof PartyEvents>(type: T, callback: (payload: MessagePayload<T, PartyEvents[T]>) => void) {
     this.EE.on('message', (payload) => {
+      const valid = payload && typeof payload === 'object' && 'type' in payload && 'data' in payload
+      if (!valid) return
+
       const message = payload as unknown as MessagePayload<T, PartyEvents[T]>
       if (message.type === type) {
         callback(message)
@@ -76,6 +98,10 @@ export class PeerParty<PartyEvents extends Record<string, unknown>> {
   }
 
   sendMessage<T extends keyof PartyEvents, D = PartyEvents[T]>(type: T, data: D) {
+    if (!this.isConnected) {
+      return
+    }
+
     Object.values(this.connections).forEach((connection) => {
       connection.send({ type, data })
     })

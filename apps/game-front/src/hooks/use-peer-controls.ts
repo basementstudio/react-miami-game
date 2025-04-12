@@ -9,7 +9,7 @@ export const {
   // send messages
   useSendMessage: useSendControlsMessage,
   // receive messages
-  useOnMessage: useControlsCallback,
+  useOnMessage: useOnControlsMessage,
   // peer events
   usePeerEvent: useControlsPeerEvent,
 } = createPeerParty<ControlsMessage>()

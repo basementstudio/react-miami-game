@@ -40,14 +40,19 @@ export default function ControlsPage() {
     []
   ); // No dependencies needed here as it reads screen orientation directly
 
+  const [error, setError] = useState<Error | null>(null);
+
+  useControlsPeerEvent("error", (error) => {
+    setError(error);
+  });
+
   const {
     requestDeviceOrientation,
     deviceOrientationStarted,
     deviceOrientationError,
   } = useDeviceOrientation({
     onUpdate: handleOrientationUpdate,
-    onError: (err) => console.error("Device Orientation Hook Error:", err), // Optional: Handle errors from the hook
-    onStarted: () => console.log("Device Orientation Hook Started"), // Optional: Handle start event
+    onError: (err) => console.error("Device Orientation Hook Error:", err),
   });
 
   // Effect to update orientation type on change
@@ -64,6 +69,22 @@ export default function ControlsPage() {
         screen.orientation.removeEventListener("change", updateOrientation);
     }
   }, []);
+
+  if (error) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100svh",
+          textAlign: "center",
+        }}
+      >
+        <p>{error.message}</p>
+      </div>
+    );
+  }
 
   if (!deviceOrientationStarted || deviceOrientationError) {
     return (

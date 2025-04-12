@@ -14,7 +14,12 @@ import { forwardRef, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { GameControls } from "../game";
 import { valueRemap } from "@/lib/math";
-import { clamp } from "three/src/math/MathUtils.js";
+import { clamp, degToRad } from "three/src/math/MathUtils.js";
+import {
+  controlsInstance,
+  useControlsPeerEvent,
+  useOnControlsMessage,
+} from "@/hooks/use-peer-controls";
 
 const up = new THREE.Vector3(0, 1, 0);
 const maxForwardSpeed = 5;
@@ -91,17 +96,33 @@ interface VehicleVectors {
 export const Car = forwardRef<THREE.Group, RigidBodyProps>((props, ref) => {
   const { rapier, world } = useRapier();
 
-  const bodyRef = useRef<RapierRigidBody>(null!);
-  const groupRef = useRef<THREE.Group>(null!);
-
   const vectors = useMemo(
     () => ({
+      activeJoystick: { current: false },
+      joystickRotation: { current: 0 },
       wheelRotation: { current: 0 },
       steeringInput: { current: 0 },
       visibleSteering: { current: 0 },
     }),
     []
   );
+
+  useControlsPeerEvent("connection", () => {
+    vectors.activeJoystick.current = true;
+  });
+
+  useControlsPeerEvent("disconnected", () => {
+    if (Object.keys(controlsInstance.connections).length === 0) {
+      vectors.activeJoystick.current = false;
+    }
+  });
+
+  useOnControlsMessage("steeringAngle", (message) => {
+    vectors.joystickRotation.current = message.data;
+  });
+
+  const bodyRef = useRef<RapierRigidBody>(null!);
+  const groupRef = useRef<THREE.Group>(null!);
 
   const steeringAngle = useRef(0);
   const steeringAngleQuat = useRef(new THREE.Quaternion());
@@ -193,8 +214,19 @@ export const Car = forwardRef<THREE.Group, RigidBodyProps>((props, ref) => {
         vectors.steeringInput.current * 0.02 * steeringMultiply;
       steeringAngle.current +=
         driftSteeringAngle.current * 0.01 * steeringMultiply;
+
+      if (vectors.activeJoystick.current) {
+        steeringAngle.current +=
+          valueRemap(vectors.joystickRotation.current, -40, 40, 0.08, -0.08) *
+          steeringMultiply;
+      }
       steeringAngleQuat.current.setFromAxisAngle(up, steeringAngle.current);
       impulse.applyQuaternion(steeringAngleQuat.current);
+    }
+
+    if (vectors.activeJoystick.current) {
+      vectors.visibleSteering.current =
+        -degToRad(vectors.joystickRotation.current) * 2;
     }
 
     // acceleration and deceleration

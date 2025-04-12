@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { Gamepad2, Loader2, Smartphone } from "lucide-react";
 import { Button } from "./ui/button";
 import { Dialog } from "./ui/dialog";
-import { controlsInstance } from "@/hooks/use-peer-controls";
+import { useControlsPeerEvent } from "@/hooks/use-peer-controls";
 
 export function ControlsQrOverlay() {
   const [isOpen, setIsOpen] = useState(false);
@@ -19,25 +19,20 @@ export function ControlsQrOverlay() {
     setIsOpen(false);
   }
 
-  useEffect(() => {
-    const onOpen = (id: string) => {
-      const windowUrl = new URL(window.location.href);
-      windowUrl.pathname = "/controls";
-      windowUrl.searchParams.set("id", id);
-      setQr(windowUrl.toString());
-    };
-    controlsInstance.on("open", onOpen);
+  useControlsPeerEvent("open", (id) => {
+    const windowUrl = new URL(window.location.href);
+    windowUrl.pathname = "/controls";
+    windowUrl.searchParams.set("id", id);
+    setQr(windowUrl.toString());
+  });
 
-    const connectionCallback = () => {
-      setIsOpen(false);
-    };
-    controlsInstance.on("connection", connectionCallback);
+  useControlsPeerEvent("connection", () => {
+    setIsOpen(false);
+  });
 
-    return () => {
-      controlsInstance.off("connection", connectionCallback);
-      controlsInstance.off("open", onOpen);
-    };
-  }, []);
+  useControlsPeerEvent("error", (error) => {
+    console.error(error);
+  });
 
   return (
     <>
