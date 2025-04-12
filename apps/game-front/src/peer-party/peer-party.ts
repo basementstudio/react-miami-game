@@ -2,7 +2,7 @@
 import Peer, { DataConnection, PeerOptions } from "peerjs";
 import { EventEmitter } from "eventemitter3";
 
-type PeerPartyEvents = {
+export type PeerPartyEvents = {
   'open': (id: string) => void
   'disconnected': () => void
   'close': () => void
@@ -71,11 +71,11 @@ export class PeerParty<PartyEvents extends Record<string, unknown>> {
     this.EE.off('message', callback as any)
   }
 
-  sendMessageTo<D = unknown, T = string>(peerId: string, type: T, data: D) {
+  sendMessageTo<T extends keyof PartyEvents, D = PartyEvents[T]>(peerId: string, type: T, data: D) {
     this.connections[peerId].send({ type, data })
   }
 
-  sendMessage<D = unknown, T = string>(type: T, data: D) {
+  sendMessage<T extends keyof PartyEvents, D = PartyEvents[T]>(type: T, data: D) {
     Object.values(this.connections).forEach((connection) => {
       connection.send({ type, data })
     })

@@ -1,9 +1,15 @@
 import { createPeerParty } from "@/peer-party";
 
+type ControlsMessage = {
+  "steeringAngle": number;
+}
+
 export const {
   instance: controlsInstance,
   // send messages
-  useSendPeerMessage: useSendControlsMessage,
+  useSendMessage: useSendControlsMessage,
   // receive messages
-  usePeerCallback: useControlsCallback,
-} = createPeerParty()
+  useOnMessage: useControlsCallback,
+  // peer events
+  usePeerEvent: useControlsPeerEvent,
+} = createPeerParty<ControlsMessage>()
