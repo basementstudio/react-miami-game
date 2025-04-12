@@ -16,6 +16,7 @@
     "@types/three": "^0.175.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "eventemitter3": "^5.0.1",
     "lucide-react": "^0.487.0",
     "next": "15.2.4",
     "partysocket": "^1.1.3",
