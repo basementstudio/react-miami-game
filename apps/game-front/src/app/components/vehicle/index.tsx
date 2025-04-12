@@ -207,7 +207,13 @@ export const Car = forwardRef<THREE.Group, RigidBodyProps>((props, ref) => {
     );
 
     if (Math.abs(speed.current) > 0.1) {
-      let steeringMultiply = valueRemap(speed.current, 0.1, 0.9, 0, 1);
+      let steeringMultiply = valueRemap(
+        Math.abs(speed.current),
+        0.1,
+        0.9,
+        0,
+        1
+      );
       steeringMultiply = clamp(steeringMultiply, 0, 1);
       // update vehicle angle
       steeringAngle.current +=
