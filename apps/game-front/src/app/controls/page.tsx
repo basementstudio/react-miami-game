@@ -1,32 +1,38 @@
 "use client";
 
 import { useDeviceOrientation } from "@/hooks/use-device-orientation";
+import {
+  controlsInstance,
+  useControlsPeerEvent,
+} from "@/hooks/use-peer-controls";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 // Component using the hook
 export default function ControlsPage() {
+  useControlsPeerEvent("open", () => {
+    const idQueryParam = new URLSearchParams(window.location.search).get("id");
+    if (idQueryParam) {
+      controlsInstance.connectToPeer(idQueryParam);
+    }
+  });
+
   const squareRef = useRef<HTMLDivElement>(null);
   const [orientationType, setOrientationType] =
     useState<OrientationType | null>(null);
 
   const handleOrientationUpdate = useCallback(
     (event: DeviceOrientationEvent) => {
-      let rotationValue: number | null = null;
       const currentOrientation =
         typeof screen !== "undefined"
           ? screen.orientation.type
           : "portrait-primary"; // Default or read
       setOrientationType(currentOrientation); // Update orientation type state
 
-      const isLandscape = currentOrientation.startsWith("landscape");
+      const rotationValue = event.beta ?? 0; // Use beta for landscape
 
-      if (isLandscape) {
-        rotationValue = event.beta; // Use beta for landscape
-      } else {
-        rotationValue = event.gamma; // Use gamma for portrait
-      }
+      controlsInstance.sendMessage("steeringAngle", rotationValue);
 
-      if (rotationValue !== null && squareRef.current) {
+      if (squareRef.current) {
         const limitedRotation = Math.max(-90, Math.min(90, rotationValue));
         squareRef.current.style.transform = `rotate(${limitedRotation}deg)`;
       }
