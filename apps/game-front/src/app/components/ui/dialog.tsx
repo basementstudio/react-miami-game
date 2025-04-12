@@ -1,4 +1,5 @@
 import React from "react";
+import { X } from "lucide-react";
 
 interface DialogProps {
   open: boolean;
@@ -16,29 +17,15 @@ export function Dialog({ open, onClose, children, title }: DialogProps) {
         className="fixed inset-0 bg-black/70 backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="relative bg-gray-900 rounded-lg p-6 shadow-lg max-w-md w-full border border-gray-800">
+      <div className="relative bg-zinc-900 rounded-lg p-6 shadow-lg max-w-md w-full border border-zinc-800">
         {title && (
-          <div className="mb-4 text-lg font-medium text-gray-200">{title}</div>
+          <div className="mb-4 text-lg font-medium text-zinc-200">{title}</div>
         )}
         <button
-          className="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-800 text-gray-400 hover:text-gray-200"
+          className="absolute top-2 right-2 p-1.5 rounded-full hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200"
           onClick={onClose}
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="lucide lucide-x"
-          >
-            <path d="M18 6 6 18" />
-            <path d="m6 6 12 12" />
-          </svg>
+          <X size={18} />
         </button>
         {children}
       </div>
