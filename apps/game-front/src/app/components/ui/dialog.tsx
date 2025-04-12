@@ -1,14 +1,22 @@
 import React from "react";
 import { X } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface DialogProps {
   open: boolean;
   onClose: () => void;
   children: React.ReactNode;
-  title?: string;
+  title?: React.ReactNode;
+  containerClassName?: string;
 }
 
-export function Dialog({ open, onClose, children, title }: DialogProps) {
+export function Dialog({
+  open,
+  onClose,
+  children,
+  title,
+  containerClassName,
+}: DialogProps) {
   if (!open) return null;
 
   return (
@@ -17,7 +25,12 @@ export function Dialog({ open, onClose, children, title }: DialogProps) {
         className="fixed inset-0 bg-black/70 backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="relative bg-zinc-900 rounded-lg p-6 shadow-lg max-w-md w-full border border-zinc-800">
+      <div
+        className={cn(
+          "relative bg-zinc-900 rounded-lg p-6 shadow-lg max-w-md w-full border border-zinc-800",
+          containerClassName
+        )}
+      >
         {title && (
           <div className="mb-4 text-lg font-medium text-zinc-200">{title}</div>
         )}

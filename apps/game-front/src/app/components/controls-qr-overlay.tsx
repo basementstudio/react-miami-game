@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import { Gamepad2 } from "lucide-react";
+import { Gamepad2, Smartphone } from "lucide-react";
 import { Button } from "./ui/button";
 import { Dialog } from "./ui/dialog";
 
@@ -28,7 +28,7 @@ export function ControlsQrOverlay() {
         <Gamepad2 size={20} strokeWidth={1.5} />
       </Button>
 
-      <Dialog open={isOpen} onClose={handleClose} title="Scan QR Code">
+      <Dialog open={isOpen} onClose={handleClose} containerClassName="w-fit">
         <div className="flex flex-col items-center">
           <div className="p-6 bg-zinc-900 rounded-lg shadow-inner">
             <QRCodeSVG
@@ -39,8 +39,12 @@ export function ControlsQrOverlay() {
               fgColor="#e4e4e7"
             />
           </div>
+          <div className="flex justify-center items-center gap-2 text-white my-4">
+            <Smartphone size={80} />
+            <Gamepad2 size={80} />
+          </div>
           <p className="mt-4 text-center text-zinc-400">
-            Scan this QR code to control the game
+            Scan to use your phone as controller.
           </p>
         </div>
       </Dialog>
