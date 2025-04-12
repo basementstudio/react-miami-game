@@ -12,11 +12,16 @@ export function Dialog({ open, onClose, children, title }: DialogProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="fixed inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative bg-white rounded-lg p-6 shadow-lg max-w-md w-full">
-        {title && <div className="mb-4 text-lg font-medium">{title}</div>}
+      <div
+        className="fixed inset-0 bg-black/70 backdrop-blur-sm"
+        onClick={onClose}
+      />
+      <div className="relative bg-gray-900 rounded-lg p-6 shadow-lg max-w-md w-full border border-gray-800">
+        {title && (
+          <div className="mb-4 text-lg font-medium text-gray-200">{title}</div>
+        )}
         <button
-          className="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100"
+          className="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-800 text-gray-400 hover:text-gray-200"
           onClick={onClose}
         >
           <svg

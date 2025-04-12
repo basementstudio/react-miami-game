@@ -21,10 +21,11 @@ export function Button({
     "inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none disabled:opacity-50";
 
   const variants = {
-    default: "bg-blue-600 text-white hover:bg-blue-700",
-    outline: "border border-gray-300 bg-transparent hover:bg-gray-100",
-    ghost: "bg-transparent hover:bg-gray-100",
-    link: "text-blue-600 underline-offset-4 hover:underline bg-transparent",
+    default: "bg-gray-800 text-gray-100 hover:bg-gray-700",
+    outline:
+      "border border-gray-700 bg-transparent hover:bg-gray-800 text-gray-300",
+    ghost: "bg-transparent hover:bg-gray-800 text-gray-300",
+    link: "text-gray-300 underline-offset-4 hover:underline bg-transparent",
   };
 
   const sizes = {
