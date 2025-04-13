@@ -72,31 +72,15 @@ export default function ControlsPage() {
 
   if (error) {
     return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100svh",
-          textAlign: "center",
-        }}
-      >
-        <p>{error.message}</p>
+      <div className="flex h-[100svh] items-center justify-center text-center bg-zinc-900 text-white">
+        <p className="text-red-500 font-bold text-2xl">{error.message}</p>
       </div>
     );
   }
 
   if (!deviceOrientationStarted || deviceOrientationError) {
     return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100svh",
-          textAlign: "center",
-        }}
-      >
+      <div className="flex h-[100svh] items-center justify-center text-center bg-zinc-900 text-white">
         {!deviceOrientationStarted && (
           <button
             onClick={requestDeviceOrientation}
@@ -106,7 +90,9 @@ export default function ControlsPage() {
           </button>
         )}
         {deviceOrientationError && (
-          <p style={{ color: "red" }}>{deviceOrientationError}</p>
+          <p className="text-red-500 font-bold text-2xl">
+            {deviceOrientationError}
+          </p>
         )}
       </div>
     );
@@ -117,16 +103,8 @@ export default function ControlsPage() {
 
   if (!okOrientation) {
     return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100svh",
-          textAlign: "center",
-        }}
-      >
-        <p style={{ color: "red" }}>
+      <div className="flex h-[100svh] items-center justify-center text-center bg-zinc-900 text-white">
+        <p className="text-red-500 font-bold text-2xl">
           Please rotate your device to landscape mode.
         </p>
       </div>
@@ -134,16 +112,7 @@ export default function ControlsPage() {
   }
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "100svh",
-        textAlign: "center",
-      }}
-    >
+    <div className="flex h-[100svh] items-center justify-center text-center bg-zinc-900 text-white">
       {!deviceOrientationStarted && (
         <button
           onClick={requestDeviceOrientation}
@@ -152,19 +121,11 @@ export default function ControlsPage() {
           Enable Controls
         </button>
       )}
-      {deviceOrientationError && (
-        <p style={{ color: "red" }}>{deviceOrientationError}</p>
-      )}
       <div
         ref={squareRef}
-        style={{
-          width: "100px",
-          height: "100px",
-          backgroundColor: "blue",
-          transition: "transform 0.1s ease-out",
-          transform: "rotate(0deg)",
-        }}
+        className="w-24 h-24 bg-blue-500 transition-transform duration-100 ease-out transform rotate-0"
       />
+      <div className="absolute top-0 left-0 w-full h-full flex items-stretch justify-stretch"></div>
     </div>
   );
 }
