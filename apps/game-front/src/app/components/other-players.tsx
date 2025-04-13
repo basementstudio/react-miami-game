@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useParty } from "./use-party";
 import { Group } from "three";
 import { useFrame } from "@react-three/fiber";
-import { CarBody } from "./vehicle";
+import { CarBody } from "./vehicle/body";
 import { SyncPresenceType, type PresenceType } from "game-schemas";
 
 const presenceRef = {
@@ -75,6 +75,14 @@ export function OtherPlayers() {
 function OtherPlayer({ id }: { id: string }) {
   const playerRef = useRef<Group>(null);
 
+  const carVectors = useMemo(
+    () => ({
+      wheelRotation: { current: 0 },
+      visibleSteering: { current: 0 },
+    }),
+    []
+  );
+
   useFrame(() => {
     const presence = presenceRef.current[id];
 
@@ -92,16 +100,9 @@ function OtherPlayer({ id }: { id: string }) {
       presence.rotation.z,
       presence.rotation.w
     );
+    carVectors.wheelRotation.current = presence.wheelRotationX;
+    carVectors.visibleSteering.current = presence.wheelRotationY;
   });
 
-  const vectors = useMemo(
-    () => ({
-      wheelRotation: { current: 0 },
-      steeringInput: { current: 0 },
-      visibleSteering: { current: 0 },
-    }),
-    []
-  );
-
-  return <CarBody ref={playerRef} v={vectors} />;
+  return <CarBody ref={playerRef} v={carVectors} />;
 }

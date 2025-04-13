@@ -3,13 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "NODE_OPTIONS='--inspect' next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
-    "game-schemas": "workspace:*",
     "@react-three/drei": "^10.0.6",
     "@react-three/fiber": "^9.1.2",
     "@react-three/rapier": "^2.1.0",
@@ -18,7 +17,9 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "eventemitter3": "^5.0.1",
+    "game-schemas": "workspace:*",
     "lucide-react": "^0.487.0",
+    "merge-refs": "^2.0.0",
     "next": "15.2.4",
     "partysocket": "^1.1.3",
     "peerjs": "^1.5.4",

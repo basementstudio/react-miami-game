@@ -53,6 +53,8 @@ function Game() {
           z: 0,
           w: 1,
         },
+        wheelRotationX: 0,
+        wheelRotationY: 0,
       },
     };
 
