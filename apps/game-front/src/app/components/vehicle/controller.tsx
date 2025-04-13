@@ -28,6 +28,7 @@ import { CarBody } from "./body";
 import { CAR_DIMENSIONS } from "./constants";
 import { UpdatePresenceActionType } from "game-schemas";
 import { useParty } from "../use-party";
+import { packMessage } from "@/lib/pack";
 
 const up = new THREE.Vector3(0, 1, 0);
 const maxForwardSpeed = 5;
@@ -90,7 +91,7 @@ export const CarController = forwardRef<THREE.Group, RigidBodyProps>(
         },
       };
 
-      party.send(JSON.stringify(newPresence));
+      party.send(packMessage(newPresence));
     });
 
     // joystick controls

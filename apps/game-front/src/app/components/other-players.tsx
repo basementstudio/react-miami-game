@@ -8,7 +8,8 @@ import { useParty } from "./use-party";
 import { Group } from "three";
 import { useFrame } from "@react-three/fiber";
 import { CarBody } from "./vehicle/body";
-import { ServerMessage, unpackMessage, type PresenceType } from "game-schemas";
+import { ServerMessage, type PresenceType } from "game-schemas";
+import { unpackMessage } from "@/lib/pack";
 
 const presenceRef = {
   current: {} as Record<string, PresenceType>,
@@ -45,6 +46,8 @@ export function OtherPlayers() {
           });
           break;
         case "player-added":
+          console.log("player-added", message.payload.id);
+
           setPlayerIds((prev) => {
             if (!prev.includes(message.payload.id)) {
               return [...prev, message.payload.id];
@@ -53,6 +56,7 @@ export function OtherPlayers() {
           });
           break;
         case "player-removed":
+          console.log("player-removed", message.payload.id);
           setPlayerIds((prev) => {
             return prev.filter((id) => id !== message.payload.id);
           });
@@ -67,6 +71,8 @@ export function OtherPlayers() {
       controller.abort();
     };
   }, [party]);
+
+  console.log(playerIds);
 
   return (
     <>

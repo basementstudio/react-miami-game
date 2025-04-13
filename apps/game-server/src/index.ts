@@ -10,38 +10,38 @@ const objectValidation = z.object({
 
 const SERVER_UPDATE_FPS = 30
 
-import { decode, encode } from 'cbor-x';
+// import { decode, encode } from 'cbor-x';
 
-export function packMessage(object: unknown, type: 'string' | 'binary' = 'binary'): string | Buffer {
-  if (type === 'string') {
-    return JSON.stringify(object)
-  }
+// export function packMessage(object: unknown, type: 'string' | 'binary' = 'binary'): string | Buffer {
+//   if (type === 'string') {
+//     return JSON.stringify(object)
+//   }
 
-  return encode(object)
-}
-
-export function unpackMessage<T>(message: string | Buffer): T {
-  if (typeof message === 'string') {
-    return JSON.parse(message)
-  } else {
-    try {
-      return decode(message)
-    } catch (e) {
-      console.log(message);
-      console.log(e);
-      throw e;
-    }
-
-  }
-}
-
-// function packMessage(object: unknown, _type: 'string' | 'binary' = 'binary'): string {
-//   return JSON.stringify(object)
+//   return encode(object)
 // }
 
-// function unpackMessage<T>(message: string): T {
-//   return JSON.parse(message)
+// export function unpackMessage<T>(message: string | Buffer): T {
+//   if (typeof message === 'string') {
+//     return JSON.parse(message)
+//   } else {
+//     try {
+//       return decode(message)
+//     } catch (e) {
+//       console.log(message);
+//       console.log(e);
+//       throw e;
+//     }
+
+//   }
 // }
+
+function packMessage(object: unknown, _type: 'string' | 'binary' = 'binary'): string {
+  return JSON.stringify(object)
+}
+
+function unpackMessage<T>(message: string): T {
+  return JSON.parse(message)
+}
 
 export default class GameServer implements Party.Server {
 
@@ -93,17 +93,16 @@ export default class GameServer implements Party.Server {
     const parsed = objectValidation.safeParse(messageJson);
     if (!parsed.success) return;
 
-    const { type, payload } = parsed.data;
-
-    switch (type) {
+    switch (parsed.data.type) {
       case "init-user":
-        const initUser = InitUserAction.safeParse(payload);
+
+        const initUser = InitUserAction.safeParse(parsed.data);
         if (initUser.success) {
           return this.initPlayerAction(initUser.data, sender);
         }
         break;
       case "update-presence":
-        const updatePresence = UpdatePresenceAction.safeParse(messageJson);
+        const updatePresence = UpdatePresenceAction.safeParse(parsed.data);
         if (updatePresence.success) {
           return this.updatePresenceAction(updatePresence.data, sender);
         }

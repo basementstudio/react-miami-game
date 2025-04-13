@@ -14,6 +14,7 @@ import { OtherPlayers } from "./other-players";
 import { Physics } from "@react-three/rapier";
 import { Ground } from "./ground";
 import { InitUserActionType } from "game-schemas";
+import { packMessage } from "@/lib/pack";
 
 export enum GameControls {
   forward = "forward",
@@ -58,7 +59,7 @@ function Game() {
       },
     };
 
-    socket.send(JSON.stringify(initPlayer));
+    socket.send(packMessage(initPlayer));
   }, [socket]);
 
   return (
