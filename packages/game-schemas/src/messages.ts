@@ -31,11 +31,23 @@ export const SyncPresenceMessage = z.object({
 
 export type SyncPresenceType = z.infer<typeof SyncPresenceMessage>;
 
+export const PullServerPresenceMessage = z.object({
+  type: z.literal("pull-server-presence"),
+  payload: z.object({
+    users: z.record(z.string(), PresenceSchema),
+  }),
+});
+
+export type PullServerPresenceMessageType = z.infer<
+  typeof PullServerPresenceMessage
+>;
+
 // Union of all possible server messages
 export const ServerMessageSchema = z.discriminatedUnion("type", [
   SyncPresenceMessage,
   PlayerAddedMessage,
   PlayerRemovedMessage,
+  PullServerPresenceMessage,
 ]);
 
 export type ServerMessage = z.infer<typeof ServerMessageSchema>; 

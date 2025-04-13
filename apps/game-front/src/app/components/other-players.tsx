@@ -22,6 +22,7 @@ export function OtherPlayers() {
   playerIdsRef.current = playerIds;
 
   const party = useParty();
+  const selfId = party.id;
 
   useEffect(() => {
     const controller = new AbortController();
@@ -31,21 +32,33 @@ export function OtherPlayers() {
       const message = unpackMessage(m.data) as ServerMessage;
 
       switch (message.type) {
-        case "sync-presence":
-          const presenceMessage = message.payload.users;
-          const selfId = party.id;
+        case "pull-server-presence":
+          console.log("pull-server-presence");
+          const allUsers = message.payload.users;
           // remove self from presence update
-          delete presenceMessage[selfId];
+          delete allUsers[selfId];
 
-          Object.entries(presenceMessage).forEach(([id, presence]) => {
-            if (!(id in presenceRef.current)) return;
+          const playerKeys = Object.keys(allUsers);
+          setPlayerIds(playerKeys);
+          Object.entries(allUsers).forEach(([id, presence]) => {
+            presenceRef.current[id] = presence;
+          });
+          break;
+        case "sync-presence":
+          const usersToUpdate = message.payload.users;
+          // remove self from presence update
+          delete usersToUpdate[selfId];
+
+          Object.entries(usersToUpdate).forEach(([id, presence]) => {
+            const currentP = presenceRef.current[id] || {};
             presenceRef.current[id] = {
-              ...presenceRef.current[id],
+              ...currentP,
               ...presence,
             };
           });
           break;
         case "player-added":
+          if (message.payload.id === party.id) return;
           console.log("player-added", message.payload.id);
 
           setPlayerIds((prev) => {
@@ -54,12 +67,16 @@ export function OtherPlayers() {
             }
             return prev;
           });
+
+          presenceRef.current[message.payload.id] = message.payload.presence;
+
           break;
         case "player-removed":
           console.log("player-removed", message.payload.id);
           setPlayerIds((prev) => {
             return prev.filter((id) => id !== message.payload.id);
           });
+          delete presenceRef.current[message.payload.id];
           break;
       }
     };
@@ -69,8 +86,9 @@ export function OtherPlayers() {
 
     return () => {
       controller.abort();
+      party.removeEventListener("message", messageHandler);
     };
-  }, [party]);
+  }, [party, selfId]);
 
   console.log(playerIds);
 

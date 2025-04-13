@@ -1,6 +1,6 @@
 import throttle from "lodash.throttle";
 import type * as Party from "partykit/server";
-import { type UserType, type SyncPresenceType, PresenceType, InitUserAction, UpdatePresenceAction, UpdatePresenceActionType, InitUserActionType, PlayerAddedMessageType, PlayerRemovedMessageType } from "game-schemas";
+import { type UserType, type SyncPresenceType, PresenceType, InitUserAction, UpdatePresenceAction, UpdatePresenceActionType, InitUserActionType, PlayerAddedMessageType, PlayerRemovedMessageType, PullServerPresenceMessageType } from "game-schemas";
 import { z } from "zod";
 
 const objectValidation = z.object({
@@ -63,8 +63,21 @@ export default class GameServer implements Party.Server {
   });
 
 
-  public onConnect(_connection: Party.Connection, _ctx: Party.ConnectionContext): void | Promise<void> {
-    this.updateUsers();
+  public onConnect(connection: Party.Connection, _ctx: Party.ConnectionContext): void | Promise<void> {
+    // send current state to this new user
+    const message = this.getAllServerPresence();
+    connection.send(packMessage(message, 'string'));
+  }
+
+  private markSynced(connection: Party.Connection<UserType>) {
+    connection.setState((prevState) => {
+      if (!prevState) throw new Error("No previous state");
+      return {
+        ...prevState,
+        shouldSyncPresence: false,
+        shouldSyncMovement: false,
+      }
+    })
   }
 
   getPresenceMessage(): SyncPresenceType {
@@ -74,10 +87,12 @@ export default class GameServer implements Party.Server {
       if (!userState || !userState.presence) continue;
       if (userState.shouldSyncPresence) {
         users[connection.id] = userState.presence;
+        this.markSynced(connection);
         continue;
       }
       if (userState.shouldSyncMovement) {
         users[connection.id] = userState.presence;
+        this.markSynced(connection);
         continue;
       }
     }
@@ -85,6 +100,16 @@ export default class GameServer implements Party.Server {
       type: "sync-presence",
       payload: { users },
     }
+  }
+
+  getAllServerPresence(): PullServerPresenceMessageType {
+    const users: Record<string, PresenceType> = {};
+    for (const connection of this.room.getConnections<UserType>()) {
+      const userState = connection.state;
+      if (!userState || !userState.presence) continue;
+      users[connection.id] = userState.presence;
+    }
+    return { type: "pull-server-presence", payload: { users } };
   }
 
   public onMessage(message: string | ArrayBufferLike, sender: Party.Connection<UserType>): void | Promise<void> {
@@ -95,7 +120,6 @@ export default class GameServer implements Party.Server {
 
     switch (parsed.data.type) {
       case "init-user":
-
         const initUser = InitUserAction.safeParse(parsed.data);
         if (initUser.success) {
           return this.initPlayerAction(initUser.data, sender);
@@ -106,6 +130,7 @@ export default class GameServer implements Party.Server {
         if (updatePresence.success) {
           return this.updatePresenceAction(updatePresence.data, sender);
         }
+        break;
     }
   }
 
