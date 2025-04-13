@@ -4,7 +4,7 @@ import { type UserType, type SyncPresenceType, PresenceType, InitUserAction, Upd
 export default class GameServer implements Party.Server {
   constructor(readonly room: Party.Room) { }
 
-  public onConnect(connection: Party.Connection, ctx: Party.ConnectionContext): void | Promise<void> {
+  public onConnect(_connection: Party.Connection, _ctx: Party.ConnectionContext): void | Promise<void> {
     this.updateUsers();
   }
 
