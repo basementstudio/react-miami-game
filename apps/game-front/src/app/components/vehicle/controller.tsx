@@ -1,4 +1,8 @@
-/** Inspired by https://github.com/isaac-mason/sketches/blob/main/sketches/rapier/arcade-vehicle-controller/src/sketch.tsx */
+/**
+ * Logic to control the vehicle by the player
+ * It will handle both keyboard and joystick controls
+ * Physics inspired by https://github.com/isaac-mason/sketches/blob/main/sketches/rapier/arcade-vehicle-controller/src/sketch.tsx
+ * */
 
 import { useKeyboardControls } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
@@ -81,13 +85,15 @@ export const CarController = forwardRef<THREE.Group, RigidBodyProps>(
             z: playerRot.z,
             w: playerRot.w,
           },
+          wheelRotationX: vectors.wheelRotation.current,
+          wheelRotationY: vectors.visibleSteering.current,
         },
       };
 
       party.send(JSON.stringify(newPresence));
     });
 
-    // update physucs
+    // joystick controls
     useControlsPeerEvent("connection", () => {
       vectors.activeJoystick.current = true;
     });
@@ -102,6 +108,7 @@ export const CarController = forwardRef<THREE.Group, RigidBodyProps>(
       vectors.joystickRotation.current = message.data;
     });
 
+    // physics
     const bodyRef = useRef<RapierRigidBody>(null!);
     const groupRef = useRef<THREE.Group>(null!);
 

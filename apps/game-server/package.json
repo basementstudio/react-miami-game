@@ -8,11 +8,15 @@
     "deploy": "partykit deploy"
   },
   "devDependencies": {
+    "@types/lodash.throttle": "^4.1.9",
     "@types/node": "^20.9.0",
     "typescript": "^5.2.2"
   },
   "dependencies": {
+    "cbor-x": "^1.6.0",
     "game-schemas": "workspace:*",
+    "lodash.throttle": "^4.1.1",
+    "msgpackr": "^1.11.2",
     "partykit": "^0.0.114",
     "zod": "^3.24.2"
   }

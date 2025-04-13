@@ -9,8 +9,8 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --format cjs,esm --dts",
-    "dev": "tsup src/index.ts --format cjs,esm --watch --dts",
+    "build": "tsup src/index.ts --format cjs,esm --dts --external msgpackr",
+    "dev": "tsup src/index.ts --format cjs,esm --watch --dts --external msgpackr",
     "lint": "eslint src",
     "clean": "rm -rf .turbo node_modules dist"
   },

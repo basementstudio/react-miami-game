@@ -1,9 +1,14 @@
+/**
+ * This component handles rendering of other players
+ * Is in charge of syncing presence and player ids
+ */
+
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useParty } from "./use-party";
 import { Group } from "three";
 import { useFrame } from "@react-three/fiber";
 import { CarBody } from "./vehicle/body";
-import { SyncPresenceType, type PresenceType } from "game-schemas";
+import { ServerMessage, unpackMessage, type PresenceType } from "game-schemas";
 
 const presenceRef = {
   current: {} as Record<string, PresenceType>,
@@ -21,36 +26,36 @@ export function OtherPlayers() {
     const controller = new AbortController();
     const signal = controller.signal;
 
-    const messageHandler = (message: MessageEvent) => {
-      const messageJson = JSON.parse(message.data) as SyncPresenceType;
+    const messageHandler = (m: MessageEvent) => {
+      const message = unpackMessage(m.data) as ServerMessage;
 
-      switch (messageJson.type) {
+      switch (message.type) {
         case "sync-presence":
-          const presenceMessage = messageJson.payload.users;
-
+          const presenceMessage = message.payload.users;
           const selfId = party.id;
-
-          presenceRef.current = presenceMessage;
-
-          // remove self from presence
+          // remove self from presence update
           delete presenceMessage[selfId];
 
-          const connIds = Object.keys(presenceMessage);
-
-          let changed = false;
-          if (connIds.length !== playerIdsRef.current.length) {
-            changed = true;
-          }
-
-          connIds.forEach((connId) => {
-            if (!playerIdsRef.current.includes(connId)) {
-              changed = true;
-            }
+          Object.entries(presenceMessage).forEach(([id, presence]) => {
+            if (!(id in presenceRef.current)) return;
+            presenceRef.current[id] = {
+              ...presenceRef.current[id],
+              ...presence,
+            };
           });
-          if (changed) {
-            setPlayerIds(connIds);
-          }
-
+          break;
+        case "player-added":
+          setPlayerIds((prev) => {
+            if (!prev.includes(message.payload.id)) {
+              return [...prev, message.payload.id];
+            }
+            return prev;
+          });
+          break;
+        case "player-removed":
+          setPlayerIds((prev) => {
+            return prev.filter((id) => id !== message.payload.id);
+          });
           break;
       }
     };
