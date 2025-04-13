@@ -3,24 +3,10 @@ import { useParty } from "./use-party";
 import { Group } from "three";
 import { useFrame } from "@react-three/fiber";
 import { CarBody } from "./vehicle";
-
-interface Presence {
-  name: string;
-  position: {
-    x: number;
-    y: number;
-    z: number;
-  };
-  rotation: {
-    x: number;
-    y: number;
-    z: number;
-    w: number;
-  };
-}
+import { SyncPresenceType, type PresenceType } from "game-schemas";
 
 const presenceRef = {
-  current: {} as Record<string, Presence>,
+  current: {} as Record<string, PresenceType>,
 };
 
 export function OtherPlayers() {
@@ -36,14 +22,11 @@ export function OtherPlayers() {
     const signal = controller.signal;
 
     const messageHandler = (message: MessageEvent) => {
-      const messageJson = JSON.parse(message.data);
+      const messageJson = JSON.parse(message.data) as SyncPresenceType;
 
       switch (messageJson.type) {
-        case "update-presence":
-          const presenceMessage = messageJson.payload.users as Record<
-            string,
-            Presence
-          >;
+        case "sync-presence":
+          const presenceMessage = messageJson.payload.users;
 
           const selfId = party.id;
 

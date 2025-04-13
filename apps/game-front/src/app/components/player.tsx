@@ -3,6 +3,7 @@ import { useParty } from "./use-party";
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Car } from "./vehicle";
+import { UpdatePresenceActionType } from "game-schemas";
 
 const playerPos = new Vector3(0, 0, 0);
 const playerRot = new Quaternion();
@@ -18,9 +19,9 @@ export function Player() {
     playerObjectRef.current.getWorldPosition(playerPos);
     playerObjectRef.current.getWorldQuaternion(playerRot);
 
-    party.send(
-      JSON.stringify({
-        type: "update-position",
+    const newPresence: UpdatePresenceActionType = {
+      type: "update-presence",
+      payload: {
         position: {
           x: playerPos.x,
           y: playerPos.y,
@@ -32,8 +33,10 @@ export function Player() {
           z: playerRot.z,
           w: playerRot.w,
         },
-      })
-    );
+      },
+    };
+
+    party.send(JSON.stringify(newPresence));
   });
 
   return (

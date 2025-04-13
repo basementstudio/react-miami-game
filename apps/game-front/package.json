@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "game-schemas": "workspace:*",
     "@react-three/drei": "^10.0.6",
     "@react-three/fiber": "^9.1.2",
     "@react-three/rapier": "^2.1.0",

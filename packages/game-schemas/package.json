@@ -1,0 +1,25 @@
+{
+  "name": "game-schemas",
+  "version": "0.1.0",
+  "private": true,
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "dev": "tsup src/index.ts --format cjs,esm --watch --dts",
+    "lint": "eslint src",
+    "clean": "rm -rf .turbo node_modules dist"
+  },
+  "dependencies": {
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "eslint": "^9",
+    "tsup": "^8.4.0",
+    "typescript": "^5"
+  }
+}

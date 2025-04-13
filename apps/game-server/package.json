@@ -12,6 +12,7 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
+    "game-schemas": "workspace:*",
     "partykit": "^0.0.114",
     "zod": "^3.24.2"
   }

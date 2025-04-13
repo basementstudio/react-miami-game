@@ -13,6 +13,7 @@ import { PartyProvider } from "./use-party";
 import { OtherPlayers } from "./other-players";
 import { Physics } from "@react-three/rapier";
 import { Ground } from "./ground";
+import { InitUserActionType } from "game-schemas";
 
 export enum GameControls {
   forward = "forward",
@@ -37,9 +38,9 @@ function Game() {
   });
 
   useEffect(() => {
-    socket.send(
-      JSON.stringify({
-        type: "init-player",
+    const initPlayer: InitUserActionType = {
+      type: "init-user",
+      payload: {
         name: "John Doe",
         position: {
           x: 0,
@@ -52,8 +53,10 @@ function Game() {
           z: 0,
           w: 1,
         },
-      })
-    );
+      },
+    };
+
+    socket.send(JSON.stringify(initPlayer));
   }, [socket]);
 
   return (

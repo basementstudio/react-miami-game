@@ -1,59 +1,5 @@
 import type * as Party from "partykit/server";
-
-import { z } from "zod";
-
-// Define the same schemas as on the server
-const Vector3Schema = z.object({
-  x: z.number(),
-  y: z.number(),
-  z: z.number(),
-});
-
-const QuaternionSchema = z.object({
-  x: z.number(),
-  y: z.number(),
-  z: z.number(),
-  w: z.number(),
-});
-
-const PlayerDataSchema = z.object({
-  name: z.string(),
-  position: Vector3Schema,
-  rotation: QuaternionSchema,
-});
-
-type PlayerData = z.infer<typeof PlayerDataSchema>;
-
-// real player state, can be null
-type PlayerState = PlayerData | null
-
-
-// Actions (client -> server)
-const UpdatePositionSchema = PlayerDataSchema.pick({
-  position: true,
-  rotation: true,
-}).extend({
-  type: z.literal("update-position"),
-});
-
-const InitPlayerSchema = PlayerDataSchema.pick({
-  name: true,
-  position: true,
-  rotation: true,
-}).extend({
-  type: z.literal("init-player"),
-});
-
-// Messages (server -> client)
-const PresenceSchema = z.object({
-  type: z.literal("update-presence"),
-  payload: z.object({
-    users: z.record(z.string(), PlayerDataSchema),
-  }),
-});
-
-type PresenceMessage = z.infer<typeof PresenceSchema>;
-
+import { type UserType, type SyncPresenceType, PresenceType, InitUserAction, UpdatePresenceAction, UpdatePresenceActionType, InitUserActionType } from "game-schemas";
 
 export default class GameServer implements Party.Server {
   constructor(readonly room: Party.Room) { }
@@ -64,64 +10,65 @@ export default class GameServer implements Party.Server {
 
   updateUsers() {
     const presenceMessage = JSON.stringify(this.getPresenceMessage());
-    for (const connection of this.room.getConnections<PlayerData>()) {
+    for (const connection of this.room.getConnections<UserType>()) {
       connection.send(presenceMessage);
     }
   }
 
-  getPresenceMessage(): PresenceMessage {
-    const users: Record<string, PlayerData> = {};
-    for (const connection of this.room.getConnections<PlayerState>()) {
+  getPresenceMessage(): SyncPresenceType {
+    const users: Record<string, PresenceType> = {};
+    for (const connection of this.room.getConnections<UserType>()) {
       const userState = connection.state;
-      if (userState) users[connection.id] = userState;
+      if (userState) users[connection.id] = userState.presence;
     }
     return {
-      type: "update-presence",
+      type: "sync-presence",
       payload: { users },
     }
   }
 
-  public onMessage(message: string, sender: Party.Connection<PlayerState>) {
-    // // send the message to all connected clients
-    // for (const conn of this.room.getConnections()) {
-    //   if (conn.id !== sender.id) {
-    //     conn.send(`${sender.id} says: ${message}`);
-    //   }
-    // }
-
+  public onMessage(message: string, sender: Party.Connection<UserType>): void | Promise<void> {
     const messageJson = JSON.parse(message);
 
-    // init player
-    const initPlayer = InitPlayerSchema.safeParse(messageJson);
-    if (initPlayer.success) {
-      const { name, position, rotation } = initPlayer.data;
+    if (typeof messageJson.type !== "string") return;
 
-      sender.setState({
-        name,
-        position,
-        rotation,
-      })
-
-      this.updateUsers();
-      return;
-    }
-
-    // update player position
-    const updatePosition = UpdatePositionSchema.safeParse(messageJson);
-    if (updatePosition.success) {
-      const { position, rotation } = updatePosition.data;
-
-      sender.setState((prevState) => {
-        if (!prevState) return null;
-        return {
-          ...prevState,
-          position,
-          rotation,
+    switch (messageJson.type) {
+      case "init-user":
+        const initUser = InitUserAction.safeParse(messageJson);
+        if (initUser.success) {
+          return this.initPlayerAction(initUser.data, sender);
         }
-      })
-      this.updateUsers();
-      return;
+        break;
+      case "update-presence":
+        const updatePresence = UpdatePresenceAction.safeParse(messageJson);
+        if (updatePresence.success) {
+          return this.updatePresenceAction(updatePresence.data, sender);
+        }
     }
+  }
+
+  private initPlayerAction(action: InitUserActionType, sender: Party.Connection<UserType>) {
+    sender.setState({
+      id: sender.id,
+      presence: action.payload,
+    })
+    this.updateUsers();
+  }
+
+  private updatePresenceAction(action: UpdatePresenceActionType, sender: Party.Connection<UserType>) {
+    if (!sender.state || !sender.state.presence) return; // no current presence, ignore update
+
+    sender.setState((prevState) => {
+      if (!prevState) throw new Error("No previous state");
+      return {
+        ...prevState,
+        presence: {
+          ...prevState.presence,
+          ...action.payload,
+        },
+      }
+    })
+    this.updateUsers();
   }
 
   onClose() {
