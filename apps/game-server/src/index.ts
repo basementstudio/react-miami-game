@@ -81,7 +81,7 @@ export default class GameServer implements Party.Server {
   }
 
   getPresenceMessage(): SyncPresenceType {
-    const users: Record<string, PresenceType> = {};
+    const users: SyncPresenceType['payload']['users'] = {};
     for (const connection of this.room.getConnections<UserType>()) {
       const userState = connection.state;
       if (!userState || !userState.presence) continue;
@@ -91,7 +91,9 @@ export default class GameServer implements Party.Server {
         continue;
       }
       if (userState.shouldSyncMovement) {
-        users[connection.id] = userState.presence;
+        // filter unwanted data
+        const { name, ...rest } = userState.presence;
+        users[connection.id] = rest;
         this.markSynced(connection);
         continue;
       }
