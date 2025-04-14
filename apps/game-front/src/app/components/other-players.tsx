@@ -5,7 +5,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useParty } from "./use-party";
-import { Group } from "three";
+import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
 import { CarBody } from "./vehicle/body";
 import { ServerMessage, type PresenceType } from "game-schemas";
@@ -100,26 +100,39 @@ export function OtherPlayers() {
 }
 
 function OtherPlayer({ id }: { id: string }) {
-  const playerRef = useRef<Group>(null);
+  const playerRef = useRef<THREE.Group>(null);
 
   const carVectors = useMemo(
     () => ({
+      originTimestamp: 0,
+      positionCurrent: new THREE.Vector3(),
+      velocity: new THREE.Vector3(),
+      deltaVelocity: new THREE.Vector3(),
       wheelRotation: { current: 0 },
       visibleSteering: { current: 0 },
     }),
     []
   );
 
-  useFrame(() => {
+  useFrame((_, delta) => {
     const presence = presenceRef.current[id];
 
     if (!presence) return;
     if (!playerRef.current) return;
 
-    playerRef.current.position.set(
-      presence.pos.x,
-      presence.pos.y,
-      presence.pos.z
+    if (carVectors.originTimestamp !== presence.timestamp) {
+      carVectors.velocity.copy(presence.vel);
+      carVectors.positionCurrent.copy(presence.pos);
+      carVectors.originTimestamp = presence.timestamp;
+    }
+
+    carVectors.deltaVelocity.copy(carVectors.velocity).multiplyScalar(delta);
+
+    carVectors.positionCurrent.add(carVectors.deltaVelocity);
+
+    playerRef.current.position.lerp(
+      carVectors.positionCurrent,
+      Math.min(delta * 10, 1)
     );
     playerRef.current.quaternion.set(
       presence.rot.x,
@@ -127,6 +140,7 @@ function OtherPlayer({ id }: { id: string }) {
       presence.rot.z,
       presence.rot.w
     );
+
     carVectors.wheelRotation.current = presence.wheel.x;
     carVectors.visibleSteering.current = presence.wheel.y;
   });

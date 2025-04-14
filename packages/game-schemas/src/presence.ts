@@ -8,10 +8,14 @@ export const PresenceSchema = z.object({
   name: z.string(),
   /** Player position */
   pos: Vector3Schema,
+  /** Movement on eachframe */
+  vel: Vector3Schema,
   /** Player rotation */
   rot: QuaternionSchema,
   /** Wheel rotation */
-  wheel: Vector2Schema
+  wheel: Vector2Schema,
+  /** Timestamp of the update frame */
+  timestamp: z.number()
 });
 
 export type PresenceType = z.infer<typeof PresenceSchema>;

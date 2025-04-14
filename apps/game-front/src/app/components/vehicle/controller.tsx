@@ -34,6 +34,12 @@ import { packMessage } from "@/lib/pack";
 
 const PLAYER_UPDATE_FPS = 15;
 
+const initialPosition = new THREE.Vector3(
+  -1.1688942909240723,
+  0.2,
+  9.06745433807373
+);
+
 const up = new THREE.Vector3(0, 1, 0);
 const maxForwardSpeed = 6;
 const maxReverseSpeed = -4;
@@ -55,14 +61,10 @@ const _cameraPosition = new THREE.Vector3();
 const _impulse = new THREE.Vector3();
 
 // TODO: replace this with _bodyPosition
-const playerPos = new THREE.Vector3(0, 0, 0);
+const playerPos = new THREE.Vector3(0, 0, 0).copy(initialPosition);
+const playerPosBefore = new THREE.Vector3(0, 0, 0).copy(initialPosition);
+const playerVel = new THREE.Vector3(0, 0, 0);
 const playerRot = new THREE.Quaternion();
-
-const initialPosition = new THREE.Vector3(
-  -1.1688942909240723,
-  0.2,
-  9.06745433807373
-);
 
 export const CarController = forwardRef<THREE.Group, RigidBodyProps>(
   (props, ref) => {
@@ -93,6 +95,11 @@ export const CarController = forwardRef<THREE.Group, RigidBodyProps>(
             y: playerPos.y,
             z: playerPos.z,
           },
+          vel: {
+            x: playerVel.x,
+            y: playerVel.y,
+            z: playerVel.z,
+          },
           rot: {
             x: playerRot.x,
             y: playerRot.y,
@@ -103,31 +110,38 @@ export const CarController = forwardRef<THREE.Group, RigidBodyProps>(
             x: vectors.wheelRotation.current,
             y: vectors.visibleSteering.current,
           },
+          timestamp: performance.now(),
         },
       } satisfies UpdatePresenceActionType;
 
       return throttle(() => {
-        if (!groupRef.current) return;
-
-        groupRef.current.getWorldPosition(playerPos);
-        groupRef.current.getWorldQuaternion(playerRot);
-
         newPresence.payload.pos.x = playerPos.x;
         newPresence.payload.pos.y = playerPos.y;
         newPresence.payload.pos.z = playerPos.z;
+        newPresence.payload.vel.x = playerVel.x;
+        newPresence.payload.vel.y = playerVel.y;
+        newPresence.payload.vel.z = playerVel.z;
         newPresence.payload.rot.x = playerRot.x;
         newPresence.payload.rot.y = playerRot.y;
         newPresence.payload.rot.z = playerRot.z;
         newPresence.payload.rot.w = playerRot.w;
         newPresence.payload.wheel.x = vectors.wheelRotation.current;
         newPresence.payload.wheel.y = vectors.visibleSteering.current;
+        newPresence.payload.timestamp = performance.now();
 
         party.send(packMessage(newPresence));
       }, 1000 / PLAYER_UPDATE_FPS);
     }, [party, vectors]);
 
-    useFrame(() => {
+    useFrame((_, delta) => {
       if (!groupRef.current) return;
+
+      groupRef.current.getWorldPosition(playerPos);
+      groupRef.current.getWorldQuaternion(playerRot);
+
+      // calculate translation in one second
+      playerVel.copy(playerPos).sub(playerPosBefore).divideScalar(delta);
+      playerPosBefore.copy(playerPos);
 
       updatePosition();
     });
