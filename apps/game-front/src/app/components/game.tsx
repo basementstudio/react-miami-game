@@ -5,7 +5,6 @@ import {
   Environment,
   KeyboardControls,
   KeyboardControlsEntry,
-  OrbitControls,
   Sky,
 } from "@react-three/drei";
 import { Suspense, useEffect } from "react";
@@ -69,20 +68,12 @@ function Game() {
     <Physics interpolate timeStep={1 / 60}>
       <KeyboardControls map={controlMap}>
         <PartyProvider socket={socket}>
-          {/* <ambientLight intensity={0.5} />
-          <pointLight
-            castShadow
-            position={[10, 10, 10]}
-            intensity={500}
-            distance={300}
-          /> */}
           <Suspense fallback={null}>
             <Player />
             <OtherPlayers />
             <Ground />
             <Track />
           </Suspense>
-          {/* <OrbitControls /> */}
           <Sky
             distance={450000}
             sunPosition={[1, 0.1, 0]}
