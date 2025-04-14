@@ -36,7 +36,7 @@ const controlMap = [
 
 function Game() {
   const socket = usePartySocket({
-    host: "localhost:1999",
+    host: process.env.NEXT_PUBLIC_PARTY_SOCKET_HOST,
     room: "game",
   });
 
