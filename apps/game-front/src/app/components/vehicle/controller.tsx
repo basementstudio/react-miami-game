@@ -14,7 +14,7 @@ import {
   useBeforePhysicsStep,
   useRapier,
 } from "@react-three/rapier";
-import { forwardRef, useMemo, useRef } from "react";
+import { forwardRef, useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { GameControls } from "../game";
 import { valueRemap } from "@/lib/math";
@@ -47,6 +47,8 @@ const _impulse = new THREE.Vector3();
 // TODO: replace this with _bodyPosition
 const playerPos = new THREE.Vector3(0, 0, 0);
 const playerRot = new THREE.Quaternion();
+
+const initialPosition = new THREE.Vector3(0, 4, 0);
 
 export const CarController = forwardRef<THREE.Group, RigidBodyProps>(
   (props, ref) => {
@@ -254,12 +256,16 @@ export const CarController = forwardRef<THREE.Group, RigidBodyProps>(
       bodyRef.current.applyImpulse(
         {
           x: -bodyRef.current.linvel().x * 1.5,
-          y: 0,
+          y: -0.05,
           z: -bodyRef.current.linvel().z * 1.5,
         },
         true
       );
     });
+
+    useEffect(() => {
+      bodyRef.current.setTranslation(initialPosition, true);
+    }, []);
 
     const camera = useThree((state) => state.camera);
 

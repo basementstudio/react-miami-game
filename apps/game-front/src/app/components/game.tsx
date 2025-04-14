@@ -6,7 +6,7 @@ import {
   KeyboardControlsEntry,
   OrbitControls,
 } from "@react-three/drei";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import usePartySocket from "partysocket/react";
 import { Player } from "./player";
 import { PartyProvider } from "./use-party";
@@ -15,6 +15,7 @@ import { Physics } from "@react-three/rapier";
 import { Ground } from "./ground";
 import { InitUserActionType } from "game-schemas";
 import { packMessage } from "@/lib/pack";
+import { Track } from "./track";
 
 export enum GameControls {
   forward = "forward",
@@ -63,7 +64,7 @@ function Game() {
   }, [socket]);
 
   return (
-    <Physics>
+    <Physics debug={true}>
       <KeyboardControls map={controlMap}>
         <PartyProvider socket={socket}>
           <ambientLight intensity={0.5} />
@@ -73,9 +74,12 @@ function Game() {
             intensity={500}
             distance={300}
           />
-          <Player />
-          <OtherPlayers />
-          <Ground />
+          <Suspense fallback={null}>
+            <Player />
+            <OtherPlayers />
+            <Ground />
+            <Track />
+          </Suspense>
           <OrbitControls />
         </PartyProvider>
       </KeyboardControls>
