@@ -15,7 +15,7 @@ export function Track() {
 
   return (
     <>
-      <RigidBody type="fixed" colliders="trimesh">
+      <RigidBody type="fixed" colliders="trimesh" restitution={0}>
         <mesh geometry={track.nodes.collider.geometry}>
           <MeshDiscardMaterial />
         </mesh>

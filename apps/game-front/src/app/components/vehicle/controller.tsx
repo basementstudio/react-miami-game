@@ -35,8 +35,12 @@ const maxForwardSpeed = 5;
 const maxReverseSpeed = -4;
 
 const CAMERA = {
-  position: new THREE.Vector3(0, 0.06, 0.4),
-  lookAt: new THREE.Vector3(0, 0.07, 0),
+  positionOffset: new THREE.Vector3(0, 0.3, 0.6),
+  lookAtOffset: new THREE.Vector3(0, 0, -2),
+  cameraTargetPosition: new THREE.Vector3(0, 0, 0),
+  cameraTargetLookat: new THREE.Vector3(),
+  cameraPosition: new THREE.Vector3(),
+  cameraLookat: new THREE.Vector3(),
 };
 
 const _bodyPosition = new THREE.Vector3();
@@ -48,7 +52,7 @@ const _impulse = new THREE.Vector3();
 const playerPos = new THREE.Vector3(0, 0, 0);
 const playerRot = new THREE.Quaternion();
 
-const initialPosition = new THREE.Vector3(0, 4, 0);
+const initialPosition = new THREE.Vector3(3.52, 0.2, 12.49);
 
 export const CarController = forwardRef<THREE.Group, RigidBodyProps>(
   (props, ref) => {
@@ -256,7 +260,7 @@ export const CarController = forwardRef<THREE.Group, RigidBodyProps>(
       bodyRef.current.applyImpulse(
         {
           x: -bodyRef.current.linvel().x * 1.5,
-          y: -0.05,
+          y: -Math.abs(speed.current) * 0.45,
           z: -bodyRef.current.linvel().z * 1.5,
         },
         true
@@ -273,7 +277,11 @@ export const CarController = forwardRef<THREE.Group, RigidBodyProps>(
       // body position
       if (!bodyRef.current) return;
       const bodyPosition = _bodyPosition.copy(bodyRef.current.translation());
+      // update mesh position
+      // groupRef.current.position.lerp(bodyPosition, delta * 10);
       groupRef.current.position.copy(bodyPosition);
+
+      // update mesh rotation
       groupRef.current.quaternion.copy(steeringAngleQuat.current);
       groupRef.current.updateMatrix();
 
@@ -297,13 +305,25 @@ export const CarController = forwardRef<THREE.Group, RigidBodyProps>(
 
       // camera
       if (true) {
-        const cameraPosition = _cameraPosition.copy(bodyPosition).add({
-          x: 1,
-          y: 1,
-          z: 1,
-        });
-        camera.position.copy(cameraPosition);
-        camera.lookAt(bodyPosition.clone().add(CAMERA.lookAt));
+        // CAMERA.cameraTargetPosition.copy(groupRef.current.position);
+        CAMERA.cameraTargetLookat
+          .copy(CAMERA.lookAtOffset)
+          .applyQuaternion(groupRef.current.quaternion);
+        CAMERA.cameraTargetLookat.add(groupRef.current.position);
+
+        CAMERA.cameraTargetPosition
+          .copy(CAMERA.positionOffset)
+          .applyQuaternion(groupRef.current.quaternion);
+        CAMERA.cameraTargetPosition.add(groupRef.current.position);
+
+        CAMERA.cameraPosition.copy(CAMERA.cameraTargetPosition);
+        CAMERA.cameraLookat.copy(CAMERA.cameraTargetLookat);
+
+        // CAMERA.cameraPosition.lerp(CAMERA.cameraTargetPosition, delta * 10);
+        // CAMERA.cameraLookat.lerp(CAMERA.cameraTargetLookat, delta * 10);
+
+        camera.position.copy(CAMERA.cameraPosition);
+        camera.lookAt(CAMERA.cameraLookat);
       }
     });
 
@@ -315,6 +335,7 @@ export const CarController = forwardRef<THREE.Group, RigidBodyProps>(
           ref={bodyRef}
           colliders={false}
           mass={CAR_DIMENSIONS.MASS}
+          restitution={0}
           ccd
           name="player"
           type="dynamic"

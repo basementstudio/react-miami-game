@@ -64,7 +64,7 @@ function Game() {
   }, [socket]);
 
   return (
-    <Physics debug={true}>
+    <Physics interpolate timeStep={1 / 60}>
       <KeyboardControls map={controlMap}>
         <PartyProvider socket={socket}>
           <ambientLight intensity={0.5} />
