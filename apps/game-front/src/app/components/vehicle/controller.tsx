@@ -56,6 +56,8 @@ export const CarController = forwardRef<THREE.Group, RigidBodyProps>(
       () => ({
         activeJoystick: { current: false },
         joystickRotation: { current: 0 },
+        joystickAcceleration: { current: false },
+        joystickBrake: { current: false },
         wheelRotation: { current: 0 },
         steeringInput: { current: 0 },
         visibleSteering: { current: 0 },
@@ -107,6 +109,14 @@ export const CarController = forwardRef<THREE.Group, RigidBodyProps>(
 
     useOnControlsMessage("steeringAngle", (message) => {
       vectors.joystickRotation.current = message.data;
+    });
+
+    useOnControlsMessage("acceleration", (message) => {
+      vectors.joystickAcceleration.current = message.data;
+    });
+
+    useOnControlsMessage("brake", (message) => {
+      vectors.joystickBrake.current = message.data;
     });
 
     // physics
@@ -227,9 +237,9 @@ export const CarController = forwardRef<THREE.Group, RigidBodyProps>(
       // acceleration and deceleration
       let speedTarget = 0;
 
-      if (forward) {
+      if (forward || vectors.joystickAcceleration.current) {
         speedTarget = maxForwardSpeed;
-      } else if (back) {
+      } else if (back || vectors.joystickBrake.current) {
         speedTarget = maxReverseSpeed;
       }
 

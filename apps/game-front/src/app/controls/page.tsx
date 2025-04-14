@@ -6,9 +6,19 @@ import {
   useControlsPeerEvent,
 } from "@/hooks/use-peer-controls";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { ArrowBigUp, ArrowBigDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 // Component using the hook
 export default function ControlsPage() {
+  const [acceleration, setAcceleration] = useState(false);
+  const [brake, setBrake] = useState(false);
+
+  useEffect(() => {
+    controlsInstance.sendMessage("acceleration", acceleration);
+    controlsInstance.sendMessage("brake", brake);
+  }, [acceleration, brake]);
+
   useControlsPeerEvent("open", () => {
     const idQueryParam = new URLSearchParams(window.location.search).get("id");
     if (idQueryParam) {
@@ -34,7 +44,7 @@ export default function ControlsPage() {
 
       if (squareRef.current) {
         const limitedRotation = Math.max(-90, Math.min(90, rotationValue));
-        squareRef.current.style.transform = `rotate(${limitedRotation}deg)`;
+        squareRef.current.style.transform = `rotate(${-limitedRotation}deg)`;
       }
     },
     []
@@ -112,7 +122,7 @@ export default function ControlsPage() {
   }
 
   return (
-    <div className="flex h-[100svh] items-center justify-center text-center bg-zinc-900 text-white">
+    <div className="flex w-screen h-[100svh] items-center justify-center text-center bg-zinc-900 text-white select-none">
       {!deviceOrientationStarted && (
         <button
           onClick={requestDeviceOrientation}
@@ -123,9 +133,26 @@ export default function ControlsPage() {
       )}
       <div
         ref={squareRef}
-        className="w-24 h-24 bg-blue-500 transition-transform duration-100 ease-out transform rotate-0"
+        className="w-24 h-2 bg-blue-500 ease-out transform rotate-0"
       />
-      <div className="absolute top-0 left-0 w-full h-full flex items-stretch justify-stretch"></div>
+      <div className="absolute top-0 left-0 w-full h-full flex items-stretch justify-stretch">
+        <div
+          onPointerDown={() => setBrake(true)}
+          onPointerUp={() => setBrake(false)}
+          className="w-1/2 h-full flex items-center justify-center"
+        >
+          <ArrowBigDown className={cn("w-12 h-12", brake && "text-blue-500")} />
+        </div>
+        <div
+          onPointerDown={() => setAcceleration(true)}
+          onPointerUp={() => setAcceleration(false)}
+          className="w-1/2 h-full flex items-center justify-center"
+        >
+          <ArrowBigUp
+            className={cn("w-12 h-12", acceleration && "text-blue-500")}
+          />
+        </div>
+      </div>
     </div>
   );
 }

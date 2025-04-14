@@ -2,6 +2,8 @@ import { createPeerParty } from "@/peer-party";
 
 type ControlsMessage = {
   "steeringAngle": number;
+  "acceleration": boolean;
+  "brake": boolean;
 }
 
 export const {
