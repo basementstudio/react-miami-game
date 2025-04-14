@@ -1,4 +1,4 @@
-import { QuaternionSchema } from "./utils";
+import { QuaternionSchema, Vector2Schema } from "./utils";
 
 import { z } from "zod";
 import { Vector3Schema } from "./utils";
@@ -6,10 +6,12 @@ import { Vector3Schema } from "./utils";
 // Player data schemas
 export const PresenceSchema = z.object({
   name: z.string(),
-  position: Vector3Schema,
-  rotation: QuaternionSchema,
-  wheelRotationX: z.number(),
-  wheelRotationY: z.number(),
+  /** Player position */
+  pos: Vector3Schema,
+  /** Player rotation */
+  rot: QuaternionSchema,
+  /** Wheel rotation */
+  wheel: Vector2Schema
 });
 
 export type PresenceType = z.infer<typeof PresenceSchema>;

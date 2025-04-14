@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "partykit dev",
     "build": "esbuild src/index.ts --bundle --platform=node --format=esm --outfile=dist/index.js",
-    "deploy": "pnpm run build && partykit deploy"
+    "deploy-server": "pnpm run build && npx partykit deploy"
   },
   "devDependencies": {
     "@types/lodash.throttle": "^4.1.9",

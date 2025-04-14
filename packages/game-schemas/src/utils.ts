@@ -7,6 +7,11 @@ export const Vector3Schema = z.object({
   z: z.number(),
 });
 
+export const Vector2Schema = z.object({
+  x: z.number(),
+  y: z.number(),
+});
+
 export const QuaternionSchema = z.object({
   x: z.number(),
   y: z.number(),

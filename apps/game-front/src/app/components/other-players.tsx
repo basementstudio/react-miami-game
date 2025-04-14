@@ -119,18 +119,18 @@ function OtherPlayer({ id }: { id: string }) {
     if (!playerRef.current) return;
 
     playerRef.current.position.set(
-      presence.position.x,
-      presence.position.y,
-      presence.position.z
+      presence.pos.x,
+      presence.pos.y,
+      presence.pos.z
     );
     playerRef.current.quaternion.set(
-      presence.rotation.x,
-      presence.rotation.y,
-      presence.rotation.z,
-      presence.rotation.w
+      presence.rot.x,
+      presence.rot.y,
+      presence.rot.z,
+      presence.rot.w
     );
-    carVectors.wheelRotation.current = presence.wheelRotationX;
-    carVectors.visibleSteering.current = presence.wheelRotationY;
+    carVectors.wheelRotation.current = presence.wheel.x;
+    carVectors.visibleSteering.current = presence.wheel.y;
   });
 
   return <CarBody ref={playerRef} v={carVectors} />;

@@ -1,5 +1,5 @@
 {
   "name": "game-server",
   "main": "dist/index.js",
-  "compatibilityDate": "2024-04-07"
+  "compatibilityDate": "2024-04-08"
 }

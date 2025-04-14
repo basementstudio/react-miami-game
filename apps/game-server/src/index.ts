@@ -1,7 +1,7 @@
-import throttle from "lodash.throttle";
 import type * as Party from "partykit/server";
 import { type UserType, type SyncPresenceType, PresenceType, InitUserAction, UpdatePresenceAction, UpdatePresenceActionType, InitUserActionType, PlayerAddedMessageType, PlayerRemovedMessageType, PullServerPresenceMessageType } from "game-schemas";
 import { z } from "zod";
+import { createThrottle } from "./utils";
 
 const objectValidation = z.object({
   type: z.string(),
@@ -31,7 +31,6 @@ const SERVER_UPDATE_FPS = 30
 //       console.log(e);
 //       throw e;
 //     }
-
 //   }
 // }
 
@@ -48,19 +47,21 @@ export default class GameServer implements Party.Server {
   constructor(readonly room: Party.Room) {
   }
 
+
+  static options = {
+    hibernate: true
+  }
+
   sendToAll = (message: string | ArrayBufferLike) => {
     for (const connection of this.room.getConnections<UserType>()) {
       connection.send(message);
     }
   }
 
-  updateUsers = throttle(() => {
+  updateUsers = createThrottle(() => {
     const presenceMessage = JSON.stringify(this.getPresenceMessage());
     this.sendToAll(presenceMessage);
-  }, 1000 / SERVER_UPDATE_FPS, {
-    leading: true,
-    trailing: true,
-  });
+  }, 1000 / SERVER_UPDATE_FPS);
 
 
   public onConnect(connection: Party.Connection, _ctx: Party.ConnectionContext): void | Promise<void> {

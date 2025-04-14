@@ -6,6 +6,7 @@
 
 import { useKeyboardControls } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
+import throttle from "lodash.throttle";
 import {
   BallCollider,
   RapierRigidBody,
@@ -80,32 +81,52 @@ export const CarController = forwardRef<THREE.Group, RigidBodyProps>(
     // update multiplayer
     const party = useParty();
 
-    useFrame(() => {
-      if (!groupRef.current) return;
-
-      groupRef.current.getWorldPosition(playerPos);
-      groupRef.current.getWorldQuaternion(playerRot);
-
-      const newPresence: UpdatePresenceActionType = {
+    const updatePosition = useMemo(() => {
+      const newPresence = {
         type: "update-presence",
         payload: {
-          position: {
+          pos: {
             x: playerPos.x,
             y: playerPos.y,
             z: playerPos.z,
           },
-          rotation: {
+          rot: {
             x: playerRot.x,
             y: playerRot.y,
             z: playerRot.z,
             w: playerRot.w,
           },
-          wheelRotationX: vectors.wheelRotation.current,
-          wheelRotationY: vectors.visibleSteering.current,
+          wheel: {
+            x: vectors.wheelRotation.current,
+            y: vectors.visibleSteering.current,
+          },
         },
-      };
+      } satisfies UpdatePresenceActionType;
 
-      party.send(packMessage(newPresence));
+      return throttle(() => {
+        if (!groupRef.current) return;
+
+        groupRef.current.getWorldPosition(playerPos);
+        groupRef.current.getWorldQuaternion(playerRot);
+
+        newPresence.payload.pos.x = playerPos.x;
+        newPresence.payload.pos.y = playerPos.y;
+        newPresence.payload.pos.z = playerPos.z;
+        newPresence.payload.rot.x = playerRot.x;
+        newPresence.payload.rot.y = playerRot.y;
+        newPresence.payload.rot.z = playerRot.z;
+        newPresence.payload.rot.w = playerRot.w;
+        newPresence.payload.wheel.x = vectors.wheelRotation.current;
+        newPresence.payload.wheel.y = vectors.visibleSteering.current;
+
+        party.send(packMessage(newPresence));
+      }, 1000 / 20);
+    }, [party, vectors]);
+
+    useFrame(() => {
+      if (!groupRef.current) return;
+
+      updatePosition();
     });
 
     // joystick controls
