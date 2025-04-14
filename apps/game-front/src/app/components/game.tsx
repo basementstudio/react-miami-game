@@ -2,9 +2,11 @@
 
 import { Canvas } from "@react-three/fiber";
 import {
+  Environment,
   KeyboardControls,
   KeyboardControlsEntry,
   OrbitControls,
+  Sky,
 } from "@react-three/drei";
 import { Suspense, useEffect } from "react";
 import usePartySocket from "partysocket/react";
@@ -67,20 +69,44 @@ function Game() {
     <Physics interpolate timeStep={1 / 60}>
       <KeyboardControls map={controlMap}>
         <PartyProvider socket={socket}>
-          <ambientLight intensity={0.5} />
+          {/* <ambientLight intensity={0.5} />
           <pointLight
             castShadow
             position={[10, 10, 10]}
             intensity={500}
             distance={300}
-          />
+          /> */}
           <Suspense fallback={null}>
             <Player />
             <OtherPlayers />
             <Ground />
             <Track />
           </Suspense>
-          <OrbitControls />
+          {/* <OrbitControls /> */}
+          <Sky
+            distance={450000}
+            sunPosition={[1, 0.1, 0]}
+            inclination={1}
+            azimuth={0.4}
+            rayleigh={2.722}
+          />
+          <Environment frames={2}>
+            <Sky
+              distance={450000}
+              sunPosition={[1, 0.1, 0]}
+              inclination={1}
+              azimuth={0.4}
+              rayleigh={2.722}
+            />
+            <mesh
+              receiveShadow
+              position={[0, -0.5, 0]}
+              rotation-x={-Math.PI / 2}
+            >
+              <planeGeometry args={[100, 100]} />
+              <meshBasicMaterial color="#343434" />
+            </mesh>
+          </Environment>
         </PartyProvider>
       </KeyboardControls>
     </Physics>

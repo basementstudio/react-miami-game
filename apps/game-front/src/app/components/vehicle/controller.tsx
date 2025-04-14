@@ -37,6 +37,8 @@ const maxReverseSpeed = -4;
 const CAMERA = {
   positionOffset: new THREE.Vector3(0, 0.4, 0.8),
   lookAtOffset: new THREE.Vector3(0, 0, -2),
+  // positionOffset: new THREE.Vector3(0.3, 0.2, 0.2),
+  // lookAtOffset: new THREE.Vector3(0, 0, 0),
   cameraTargetPosition: new THREE.Vector3(0, 0, 0),
   cameraTargetLookat: new THREE.Vector3(),
   cameraPosition: new THREE.Vector3(),

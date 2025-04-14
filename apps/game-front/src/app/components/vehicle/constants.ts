@@ -9,9 +9,9 @@ export const CAR_DIMENSIONS = {
 
 // Wheel properties
 export const WHEEL = {
-  RADIUS: 0.03,
+  RADIUS: 0.04,
   WIDTH: 0.03,
-  HEIGHT_OFFSET: -0.06,
+  HEIGHT_OFFSET: -0.0,
   FRONT_OFFSET: -0.1,
   REAR_OFFSET: 0.1,
   SIDE_OFFSET: 0.07,

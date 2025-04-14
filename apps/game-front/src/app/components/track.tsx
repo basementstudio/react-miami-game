@@ -24,7 +24,12 @@ export function Track() {
         </mesh>
       </RigidBody>
       <mesh geometry={track.nodes.track.geometry}>
-        <meshStandardMaterial color="#717171" side={THREE.DoubleSide} />
+        <meshStandardMaterial
+          color="#404040"
+          side={THREE.DoubleSide}
+          roughness={1}
+          metalness={0}
+        />
       </mesh>
     </>
   );
