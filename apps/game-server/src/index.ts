@@ -58,10 +58,15 @@ export default class GameServer implements Party.Server {
     }
   }
 
-  updateUsers = createThrottle(() => {
-    const presenceMessage = JSON.stringify(this.getPresenceMessage());
-    this.sendToAll(presenceMessage);
-  }, 1000 / SERVER_UPDATE_FPS);
+  updateUsers = createThrottle(
+
+    () => {
+
+      const presenceMessage = JSON.stringify(this.getPresenceMessage());
+      this.sendToAll(presenceMessage);
+    },
+    1000 / SERVER_UPDATE_FPS
+  );
 
 
   public onConnect(connection: Party.Connection, _ctx: Party.ConnectionContext): void | Promise<void> {

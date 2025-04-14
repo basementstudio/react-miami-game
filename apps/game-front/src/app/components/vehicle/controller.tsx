@@ -12,6 +12,7 @@ import {
   RapierRigidBody,
   RigidBody,
   RigidBodyProps,
+  useAfterPhysicsStep,
   useBeforePhysicsStep,
   useRapier,
 } from "@react-three/rapier";
@@ -30,6 +31,8 @@ import { CAR_DIMENSIONS, WHEEL } from "./constants";
 import { UpdatePresenceActionType } from "game-schemas";
 import { useParty } from "../use-party";
 import { packMessage } from "@/lib/pack";
+
+const PLAYER_UPDATE_FPS = 15;
 
 const up = new THREE.Vector3(0, 1, 0);
 const maxForwardSpeed = 6;
@@ -120,7 +123,7 @@ export const CarController = forwardRef<THREE.Group, RigidBodyProps>(
         newPresence.payload.wheel.y = vectors.visibleSteering.current;
 
         party.send(packMessage(newPresence));
-      }, 1000 / 20);
+      }, 1000 / PLAYER_UPDATE_FPS);
     }, [party, vectors]);
 
     useFrame(() => {
@@ -306,16 +309,45 @@ export const CarController = forwardRef<THREE.Group, RigidBodyProps>(
     const groundRayOrigin = new THREE.Vector3();
     const groundAlignmentQuat = new THREE.Quaternion();
 
-    useFrame(({ scene }, delta) => {
+    const scene = useThree((state) => state.scene);
+    const prevTimestamp = useRef(0);
+
+    const springNormal = new THREE.Vector3();
+    const springVector = (
+      vectorA: THREE.Vector3,
+      vectorB: THREE.Vector3,
+      maxDistance: number,
+      force: number,
+      delta: number
+    ) => {
+      vectorA.lerp(vectorB, force * delta);
+
+      const len = vectorA.distanceTo(vectorB);
+
+      if (len > maxDistance) {
+        springNormal.copy(vectorB).sub(vectorA).normalize();
+        vectorA.copy(vectorB).sub(springNormal.multiplyScalar(maxDistance));
+      }
+
+      return vectorA;
+    };
+
+    useAfterPhysicsStep(() => {
+      const now = performance.now();
+      const d = now - prevTimestamp.current;
+      prevTimestamp.current = now;
+      const delta = Math.min(d, 0.1);
       // body position
       if (!bodyRef.current) return;
 
       groundRayOrigin.copy(bodyRef.current.translation());
       raycaster.set(groundRayOrigin, groundRayDirection);
 
-      const intersects = raycaster.intersectObject(scene, true).filter((i) => {
-        return i.object.userData?.isGround;
-      });
+      const ground = scene.getObjectByName("track-ground");
+
+      if (!ground) return;
+
+      const intersects = raycaster.intersectObject(ground, false);
 
       if (!intersects.length) return;
 
@@ -335,8 +367,8 @@ export const CarController = forwardRef<THREE.Group, RigidBodyProps>(
       bodyPosition.copy(intersect.point);
       bodyPosition.y += WHEEL.RADIUS - WHEEL.HEIGHT_OFFSET;
       // update mesh position
-      groupRef.current.position.lerp(bodyPosition, delta * 10);
-      // groupRef.current.position.copy(bodyPosition);
+      // groupRef.current.position.lerp(bodyPosition, delta * 10);
+      groupRef.current.position.copy(bodyPosition);
       // groupRef.current.position.setX(bodyPosition.x);
       // groupRef.current.position.y = THREE.MathUtils.lerp(
       //   groupRef.current.position.y,
@@ -374,7 +406,13 @@ export const CarController = forwardRef<THREE.Group, RigidBodyProps>(
           .copy(CAMERA.lookAtOffset)
           .applyQuaternion(groupRef.current.quaternion);
         CAMERA.cameraTargetLookat.add(bodyPosition);
-        CAMERA.cameraLookat.copy(CAMERA.cameraTargetLookat);
+        springVector(
+          CAMERA.cameraLookat,
+          CAMERA.cameraTargetLookat,
+          0.1,
+          2,
+          delta
+        );
         camera.lookAt(CAMERA.cameraLookat);
 
         // update position
@@ -383,7 +421,8 @@ export const CarController = forwardRef<THREE.Group, RigidBodyProps>(
           .applyQuaternion(groupRef.current.quaternion);
         CAMERA.cameraTargetPosition.add(bodyPosition);
         CAMERA.cameraPosition.copy(CAMERA.cameraTargetPosition);
-        camera.position.lerp(CAMERA.cameraPosition, delta * 10);
+
+        springVector(camera.position, CAMERA.cameraPosition, 0.3, 2, delta);
       }
     });
 

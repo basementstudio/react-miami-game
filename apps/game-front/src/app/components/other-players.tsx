@@ -90,8 +90,6 @@ export function OtherPlayers() {
     };
   }, [party, selfId]);
 
-  console.log(playerIds);
-
   return (
     <>
       {playerIds.map((id) => (

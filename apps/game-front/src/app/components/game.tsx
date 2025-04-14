@@ -5,6 +5,7 @@ import {
   Environment,
   KeyboardControls,
   KeyboardControlsEntry,
+  PerspectiveCamera,
   Sky,
 } from "@react-three/drei";
 import { Suspense, useEffect } from "react";
@@ -37,7 +38,7 @@ const controlMap = [
 function Game() {
   const socket = usePartySocket({
     host: process.env.NEXT_PUBLIC_PARTY_SOCKET_HOST,
-    room: "game",
+    room: "game-2",
   });
 
   useEffect(() => {
@@ -45,19 +46,21 @@ function Game() {
       type: "init-user",
       payload: {
         name: "John Doe",
-        position: {
+        pos: {
           x: 0,
           y: 0,
           z: 0,
         },
-        rotation: {
+        rot: {
           x: 0,
           y: 0,
           z: 0,
           w: 1,
         },
-        wheelRotationX: 0,
-        wheelRotationY: 0,
+        wheel: {
+          x: 0,
+          y: 0,
+        },
       },
     };
 
@@ -66,6 +69,7 @@ function Game() {
 
   return (
     <Physics interpolate timeStep={1 / 60}>
+      <PerspectiveCamera makeDefault position={[0, 0, 0]} fov={50} />
       <KeyboardControls map={controlMap}>
         <PartyProvider socket={socket}>
           <Suspense fallback={null}>

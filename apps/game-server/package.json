@@ -4,13 +4,15 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "partykit dev",
+    "dev": "concurrently \"pnpm run build-watch\" \"partykit dev\"",
+    "build-watch": "esbuild src/index.ts --bundle --platform=node --format=esm --outfile=dist/index.js --watch",
     "build": "esbuild src/index.ts --bundle --platform=node --format=esm --outfile=dist/index.js",
     "deploy-server": "pnpm run build && npx partykit deploy"
   },
   "devDependencies": {
     "@types/lodash.throttle": "^4.1.9",
     "@types/node": "^20.9.0",
+    "concurrently": "^9.1.2",
     "esbuild": "^0.20.0",
     "typescript": "^5.2.2"
   },
