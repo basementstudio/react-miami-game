@@ -5,11 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "partykit dev",
-    "deploy": "partykit deploy"
+    "build": "esbuild src/index.ts --bundle --platform=node --format=esm --outfile=dist/index.js",
+    "deploy": "pnpm run build && partykit deploy"
   },
   "devDependencies": {
     "@types/lodash.throttle": "^4.1.9",
     "@types/node": "^20.9.0",
+    "esbuild": "^0.20.0",
     "typescript": "^5.2.2"
   },
   "dependencies": {
