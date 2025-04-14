@@ -18,6 +18,7 @@ import { Ground } from "./ground";
 import { InitUserActionType } from "game-schemas";
 import { packMessage } from "@/lib/pack";
 import { Track } from "./track";
+import { CarBodyInstancer } from "./vehicle/body";
 
 export enum GameControls {
   forward = "forward",
@@ -79,8 +80,10 @@ function Game() {
       <KeyboardControls map={controlMap}>
         <PartyProvider socket={socket}>
           <Suspense fallback={null}>
-            <Player />
-            <OtherPlayers />
+            <CarBodyInstancer>
+              <Player />
+              <OtherPlayers />
+            </CarBodyInstancer>
             <Ground />
             <Track />
           </Suspense>
