@@ -25,17 +25,17 @@ import {
   useOnControlsMessage,
 } from "@/hooks/use-peer-controls";
 import { CarBody } from "./body";
-import { CAR_DIMENSIONS } from "./constants";
+import { CAR_DIMENSIONS, WHEEL } from "./constants";
 import { UpdatePresenceActionType } from "game-schemas";
 import { useParty } from "../use-party";
 import { packMessage } from "@/lib/pack";
 
 const up = new THREE.Vector3(0, 1, 0);
-const maxForwardSpeed = 5;
+const maxForwardSpeed = 6;
 const maxReverseSpeed = -4;
 
 const CAMERA = {
-  positionOffset: new THREE.Vector3(0, 0.3, 0.6),
+  positionOffset: new THREE.Vector3(0, 0.4, 0.8),
   lookAtOffset: new THREE.Vector3(0, 0, -2),
   cameraTargetPosition: new THREE.Vector3(0, 0, 0),
   cameraTargetLookat: new THREE.Vector3(),
@@ -43,7 +43,7 @@ const CAMERA = {
   cameraLookat: new THREE.Vector3(),
 };
 
-const _bodyPosition = new THREE.Vector3();
+const bodyPosition = new THREE.Vector3();
 const _bodyEuler = new THREE.Euler();
 const _cameraPosition = new THREE.Vector3();
 const _impulse = new THREE.Vector3();
@@ -52,7 +52,11 @@ const _impulse = new THREE.Vector3();
 const playerPos = new THREE.Vector3(0, 0, 0);
 const playerRot = new THREE.Quaternion();
 
-const initialPosition = new THREE.Vector3(3.52, 0.2, 12.49);
+const initialPosition = new THREE.Vector3(
+  -1.1688942909240723,
+  0.2,
+  9.06745433807373
+);
 
 export const CarController = forwardRef<THREE.Group, RigidBodyProps>(
   (props, ref) => {
@@ -273,16 +277,53 @@ export const CarController = forwardRef<THREE.Group, RigidBodyProps>(
 
     const camera = useThree((state) => state.camera);
 
-    useFrame((_, delta) => {
+    const raycaster = new THREE.Raycaster();
+    const groundNormal = new THREE.Vector3(0, 1, 0);
+    const groundRayDirection = new THREE.Vector3(0, -1, 0);
+    const groundRayOrigin = new THREE.Vector3();
+    const groundAlignmentQuat = new THREE.Quaternion();
+
+    useFrame(({ scene }, delta) => {
       // body position
       if (!bodyRef.current) return;
-      const bodyPosition = _bodyPosition.copy(bodyRef.current.translation());
+
+      groundRayOrigin.copy(bodyRef.current.translation());
+      raycaster.set(groundRayOrigin, groundRayDirection);
+
+      const intersects = raycaster.intersectObject(scene, true).filter((i) => {
+        return i.object.userData?.isGround;
+      });
+
+      if (!intersects.length) return;
+
+      const intersect = intersects[0];
+
+      if (intersect.normal) {
+        groundNormal.lerp(intersect.normal!, delta * 5);
+      }
+
+      groundAlignmentQuat.setFromUnitVectors(up, groundNormal);
+
+      const finalQuat = new THREE.Quaternion().multiplyQuaternions(
+        groundAlignmentQuat,
+        steeringAngleQuat.current
+      );
+
+      bodyPosition.copy(intersect.point);
+      bodyPosition.y += WHEEL.RADIUS - WHEEL.HEIGHT_OFFSET;
       // update mesh position
-      // groupRef.current.position.lerp(bodyPosition, delta * 10);
-      groupRef.current.position.copy(bodyPosition);
+      groupRef.current.position.lerp(bodyPosition, delta * 10);
+      // groupRef.current.position.copy(bodyPosition);
+      // groupRef.current.position.setX(bodyPosition.x);
+      // groupRef.current.position.y = THREE.MathUtils.lerp(
+      //   groupRef.current.position.y,
+      //   bodyPosition.y,
+      //   delta * 30
+      // );
+      // groupRef.current.position.setZ(bodyPosition.z);
 
       // update mesh rotation
-      groupRef.current.quaternion.copy(steeringAngleQuat.current);
+      groupRef.current.quaternion.copy(finalQuat);
       groupRef.current.updateMatrix();
 
       // drift visual angle
@@ -305,25 +346,21 @@ export const CarController = forwardRef<THREE.Group, RigidBodyProps>(
 
       // camera
       if (true) {
-        // CAMERA.cameraTargetPosition.copy(groupRef.current.position);
+        // update lookat
         CAMERA.cameraTargetLookat
           .copy(CAMERA.lookAtOffset)
           .applyQuaternion(groupRef.current.quaternion);
-        CAMERA.cameraTargetLookat.add(groupRef.current.position);
+        CAMERA.cameraTargetLookat.add(bodyPosition);
+        CAMERA.cameraLookat.copy(CAMERA.cameraTargetLookat);
+        camera.lookAt(CAMERA.cameraLookat);
 
+        // update position
         CAMERA.cameraTargetPosition
           .copy(CAMERA.positionOffset)
           .applyQuaternion(groupRef.current.quaternion);
-        CAMERA.cameraTargetPosition.add(groupRef.current.position);
-
+        CAMERA.cameraTargetPosition.add(bodyPosition);
         CAMERA.cameraPosition.copy(CAMERA.cameraTargetPosition);
-        CAMERA.cameraLookat.copy(CAMERA.cameraTargetLookat);
-
-        // CAMERA.cameraPosition.lerp(CAMERA.cameraTargetPosition, delta * 10);
-        // CAMERA.cameraLookat.lerp(CAMERA.cameraTargetLookat, delta * 10);
-
-        camera.position.copy(CAMERA.cameraPosition);
-        camera.lookAt(CAMERA.cameraLookat);
+        camera.position.lerp(CAMERA.cameraPosition, delta * 10);
       }
     });
 

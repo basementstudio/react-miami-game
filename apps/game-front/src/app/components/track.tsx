@@ -16,7 +16,10 @@ export function Track() {
   return (
     <>
       <RigidBody type="fixed" colliders="trimesh" restitution={0}>
-        <mesh geometry={track.nodes.collider.geometry}>
+        <mesh
+          geometry={track.nodes.collider.geometry}
+          userData={{ isGround: true }}
+        >
           <MeshDiscardMaterial />
         </mesh>
       </RigidBody>
