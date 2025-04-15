@@ -40,6 +40,9 @@ const up = new THREE.Vector3(0, 1, 0);
 const maxForwardSpeed = 6;
 const maxReverseSpeed = -4;
 
+const joysticRemapFrom = 30;
+const joysticRemapTo = 0.04;
+
 const CAMERA = {
   positionOffset: new THREE.Vector3(0, 0.4, 0.8),
   lookAtOffset: new THREE.Vector3(0, 0, -2),
@@ -268,8 +271,13 @@ export const CarController = forwardRef<THREE.Group, RigidBodyProps>(
 
         if (vectors.activeJoystick.current) {
           steeringAngle.current +=
-            valueRemap(vectors.joystickRotation.current, -40, 40, 0.08, -0.08) *
-            steeringMultiply;
+            valueRemap(
+              vectors.joystickRotation.current,
+              -joysticRemapFrom,
+              joysticRemapFrom,
+              joysticRemapTo,
+              -joysticRemapTo
+            ) * steeringMultiply;
         }
         steeringAngleQuat.current.setFromAxisAngle(up, steeringAngle.current);
         impulse.applyQuaternion(steeringAngleQuat.current);

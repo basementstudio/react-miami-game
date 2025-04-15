@@ -39,7 +39,7 @@ export default function ControlsPage() {
       onSteeringChange={(angle) =>
         controlsInstance.sendMessage("steeringAngle", angle)
       }
-      rotationLimit={20}
+      rotationLimit={30}
     />
   );
 }
