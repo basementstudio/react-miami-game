@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "NODE_OPTIONS='--inspect' next dev",
-    "build": "next build",
+    "dev": "basehub dev & NODE_OPTIONS='--inspect' next dev",
+    "build": "basehub && next build",
     "start": "next start",
     "lint": "next lint"
   },
@@ -14,6 +14,7 @@
     "@react-three/rapier": "^2.1.0",
     "@shadcn/ui": "^0.0.4",
     "@types/three": "^0.175.0",
+    "basehub": "^8.1.32",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "eventemitter3": "^5.0.1",
