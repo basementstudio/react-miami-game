@@ -37,14 +37,14 @@ const PLAYER_UPDATE_FPS = 15;
 const initialPosition = new THREE.Vector3(0, 0.01, 0);
 
 const up = new THREE.Vector3(0, 1, 0);
-const maxForwardSpeed = 6;
+const maxForwardSpeed = 8;
 const maxReverseSpeed = -4;
 
 const joysticRemapFrom = 30;
 const joysticRemapTo = 0.04;
 
 const CAMERA = {
-  positionOffset: new THREE.Vector3(0, 0.4, 0.8),
+  positionOffset: new THREE.Vector3(0, 0.3, 0.8),
   lookAtOffset: new THREE.Vector3(0, 0, -2),
   // positionOffset: new THREE.Vector3(0.1, 0.1, -0.2).multiplyScalar(2),
   // lookAtOffset: new THREE.Vector3(0, 0.05, 0),
