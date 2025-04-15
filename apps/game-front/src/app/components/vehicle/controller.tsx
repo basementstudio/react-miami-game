@@ -34,11 +34,7 @@ import { packMessage } from "@/lib/pack";
 
 const PLAYER_UPDATE_FPS = 15;
 
-const initialPosition = new THREE.Vector3(
-  -1.1688942909240723,
-  0.2,
-  9.06745433807373
-);
+const initialPosition = new THREE.Vector3(0, 0.01, 0);
 
 const up = new THREE.Vector3(0, 1, 0);
 const maxForwardSpeed = 6;
@@ -316,14 +312,6 @@ export const CarController = forwardRef<THREE.Group, RigidBodyProps>(
     }, []);
 
     const camera = useThree((state) => state.camera);
-
-    const raycaster = new THREE.Raycaster();
-    const groundNormal = new THREE.Vector3(0, 1, 0);
-    const groundRayDirection = new THREE.Vector3(0, -1, 0);
-    const groundRayOrigin = new THREE.Vector3();
-    const groundAlignmentQuat = new THREE.Quaternion();
-
-    const scene = useThree((state) => state.scene);
     const prevTimestamp = useRef(0);
 
     const springNormal = new THREE.Vector3();
@@ -354,45 +342,12 @@ export const CarController = forwardRef<THREE.Group, RigidBodyProps>(
       // body position
       if (!bodyRef.current) return;
 
-      groundRayOrigin.copy(bodyRef.current.translation());
-      raycaster.set(groundRayOrigin, groundRayDirection);
-
-      const ground = scene.getObjectByName("track-ground");
-
-      if (!ground) return;
-
-      const intersects = raycaster.intersectObject(ground, false);
-
-      if (!intersects.length) return;
-
-      const intersect = intersects[0];
-
-      if (intersect.normal) {
-        groundNormal.lerp(intersect.normal!, delta * 5);
-      }
-
-      groundAlignmentQuat.setFromUnitVectors(up, groundNormal);
-
-      const finalQuat = new THREE.Quaternion().multiplyQuaternions(
-        groundAlignmentQuat,
-        steeringAngleQuat.current
-      );
-
-      bodyPosition.copy(intersect.point);
-      bodyPosition.y += WHEEL.RADIUS - WHEEL.HEIGHT_OFFSET;
-      // update mesh position
-      // groupRef.current.position.lerp(bodyPosition, delta * 10);
+      bodyPosition.copy(bodyRef.current.translation());
+      bodyPosition.y = WHEEL.RADIUS - WHEEL.HEIGHT_OFFSET;
       groupRef.current.position.copy(bodyPosition);
-      // groupRef.current.position.setX(bodyPosition.x);
-      // groupRef.current.position.y = THREE.MathUtils.lerp(
-      //   groupRef.current.position.y,
-      //   bodyPosition.y,
-      //   delta * 30
-      // );
-      // groupRef.current.position.setZ(bodyPosition.z);
 
       // update mesh rotation
-      groupRef.current.quaternion.copy(finalQuat);
+      groupRef.current.quaternion.copy(steeringAngleQuat.current);
       groupRef.current.updateMatrix();
 
       // drift visual angle
