@@ -31,15 +31,18 @@ export default function ControlsPage() {
   }
 
   return (
-    <OrientationControls
-      onAccelerationChange={(acceleration) =>
-        controlsInstance.sendMessage("acceleration", acceleration)
-      }
-      onBreakChange={(brake) => controlsInstance.sendMessage("brake", brake)}
-      onSteeringChange={(angle) =>
-        controlsInstance.sendMessage("steeringAngle", angle)
-      }
-      rotationLimit={30}
-    />
+    <div className="bg-zinc-900">
+      <OrientationControls
+        showInclination
+        onAccelerationChange={(acceleration) =>
+          controlsInstance.sendMessage("acceleration", acceleration)
+        }
+        onBreakChange={(brake) => controlsInstance.sendMessage("brake", brake)}
+        onSteeringChange={(angle) =>
+          controlsInstance.sendMessage("steeringAngle", angle)
+        }
+        rotationLimit={30}
+      />
+    </div>
   );
 }

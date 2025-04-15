@@ -12,6 +12,7 @@ interface OrientationControlsProps {
   onBreakChange?: (enabled: boolean) => void;
   onSteeringChange?: (angle: number) => void;
   rotationLimit?: number;
+  showInclination?: boolean;
 }
 
 export function OrientationControls({
@@ -19,6 +20,7 @@ export function OrientationControls({
   onBreakChange,
   onSteeringChange,
   rotationLimit = 90,
+  showInclination = false,
 }: OrientationControlsProps) {
   const [acceleration, setAcceleration] = useState(false);
   const [brake, setBrake] = useState(false);
@@ -123,7 +125,7 @@ export function OrientationControls({
   }
 
   return (
-    <div className="flex w-screen h-[100svh] items-center justify-center text-center bg-zinc-900 text-white select-none">
+    <div className="flex w-screen h-[100svh] items-center justify-center text-center text-white select-none">
       {!deviceOrientationStarted && (
         <button
           onClick={requestDeviceOrientation}
@@ -132,10 +134,12 @@ export function OrientationControls({
           Enable Controls
         </button>
       )}
-      <div
-        ref={squareRef}
-        className="w-24 h-2 bg-blue-500 ease-out transform rotate-0"
-      />
+      {showInclination && (
+        <div
+          ref={squareRef}
+          className="w-24 h-2 bg-blue-500 ease-out transform rotate-0"
+        />
+      )}
       <div className="absolute top-0 left-0 w-full h-full flex items-stretch justify-stretch">
         <div
           onPointerDown={() => setBrake(true)}

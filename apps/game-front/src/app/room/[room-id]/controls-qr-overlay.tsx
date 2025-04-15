@@ -3,8 +3,8 @@
 import React, { useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { Gamepad2, Loader2, Smartphone } from "lucide-react";
-import { Button } from "./ui/button";
-import { Dialog } from "./ui/dialog";
+import { Button } from "@/app/components/ui/button";
+import { Dialog } from "@/app/components/ui/dialog";
 import { useControlsPeerEvent } from "@/hooks/use-peer-controls";
 
 export function ControlsQrOverlay() {

@@ -65,22 +65,29 @@ const playerPosBefore = new THREE.Vector3(0, 0, 0).copy(initialPosition);
 const playerVel = new THREE.Vector3(0, 0, 0);
 const playerRot = new THREE.Quaternion();
 
-export const CarController = forwardRef<THREE.Group, RigidBodyProps>(
-  (props, ref) => {
-    const { rapier, world } = useRapier();
+export interface CarControllerVectors {
+  activeJoystick: { current: boolean };
+  joystickRotation: { current: number };
+  joystickAcceleration: { current: boolean };
+  joystickBrake: { current: boolean };
+  wheelRotation: { current: number };
+  steeringInput: { current: number };
+  visibleSteering: { current: number };
+}
 
-    const vectors = useMemo(
-      () => ({
-        activeJoystick: { current: false },
-        joystickRotation: { current: 0 },
-        joystickAcceleration: { current: false },
-        joystickBrake: { current: false },
-        wheelRotation: { current: 0 },
-        steeringInput: { current: 0 },
-        visibleSteering: { current: 0 },
-      }),
-      []
-    );
+export const controllerVectors: CarControllerVectors = {
+  activeJoystick: { current: false },
+  joystickRotation: { current: 0 },
+  joystickAcceleration: { current: false },
+  joystickBrake: { current: false },
+  wheelRotation: { current: 0 },
+  steeringInput: { current: 0 },
+  visibleSteering: { current: 0 },
+};
+
+export const CarController = forwardRef<THREE.Group, unknown>(
+  function CarControllerInner(_props, ref) {
+    const groupRef = useRef<THREE.Group>(null!);
 
     // update multiplayer
     const party = useParty();
@@ -106,8 +113,8 @@ export const CarController = forwardRef<THREE.Group, RigidBodyProps>(
             w: playerRot.w,
           },
           wheel: {
-            x: vectors.wheelRotation.current,
-            y: vectors.visibleSteering.current,
+            x: controllerVectors.wheelRotation.current,
+            y: controllerVectors.visibleSteering.current,
           },
           timestamp: performance.now(),
         },
@@ -124,13 +131,13 @@ export const CarController = forwardRef<THREE.Group, RigidBodyProps>(
         newPresence.payload.rot.y = playerRot.y;
         newPresence.payload.rot.z = playerRot.z;
         newPresence.payload.rot.w = playerRot.w;
-        newPresence.payload.wheel.x = vectors.wheelRotation.current;
-        newPresence.payload.wheel.y = vectors.visibleSteering.current;
+        newPresence.payload.wheel.x = controllerVectors.wheelRotation.current;
+        newPresence.payload.wheel.y = controllerVectors.visibleSteering.current;
         newPresence.payload.timestamp = performance.now();
 
         party.send(packMessage(newPresence));
       }, 1000 / PLAYER_UPDATE_FPS);
-    }, [party, vectors]);
+    }, [party]);
 
     useFrame((_, delta) => {
       if (!groupRef.current) return;
@@ -147,26 +154,40 @@ export const CarController = forwardRef<THREE.Group, RigidBodyProps>(
 
     // joystick controls
     useControlsPeerEvent("connection", () => {
-      vectors.activeJoystick.current = true;
+      controllerVectors.activeJoystick.current = true;
     });
 
     useControlsPeerEvent("disconnected", () => {
       if (Object.keys(controlsInstance.connections).length === 0) {
-        vectors.activeJoystick.current = false;
+        controllerVectors.activeJoystick.current = false;
       }
     });
 
     useOnControlsMessage("steeringAngle", (message) => {
-      vectors.joystickRotation.current = message.data;
+      controllerVectors.joystickRotation.current = message.data;
     });
 
     useOnControlsMessage("acceleration", (message) => {
-      vectors.joystickAcceleration.current = message.data;
+      controllerVectors.joystickAcceleration.current = message.data;
     });
 
     useOnControlsMessage("brake", (message) => {
-      vectors.joystickBrake.current = message.data;
+      controllerVectors.joystickBrake.current = message.data;
     });
+
+    return <CarPhysics vectors={controllerVectors} ref={ref} />;
+  }
+);
+
+CarController.displayName = "CarController";
+
+interface CarPhysicsProps extends RigidBodyProps {
+  vectors: CarControllerVectors;
+}
+
+export const CarPhysics = forwardRef<THREE.Group, CarPhysicsProps>(
+  ({ vectors, ...props }, ref) => {
+    const { rapier, world } = useRapier();
 
     // physics
     const bodyRef = useRef<RapierRigidBody>(null!);
@@ -433,4 +454,4 @@ export const CarController = forwardRef<THREE.Group, RigidBodyProps>(
   }
 );
 
-CarController.displayName = "CarController";
+CarPhysics.displayName = "CarPhysics";
