@@ -5,6 +5,7 @@ import { AssetsProvider } from "./components/assets";
 import { client } from "@/lib/basehub";
 import { assetsQuery } from "@/lib/basehub";
 import { Toolbar } from "basehub/next-toolbar";
+import { cn } from "@/lib/utils";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,7 +32,11 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={cn(
+          geistSans.variable,
+          geistMono.variable,
+          "antialiased overscroll-none select-none"
+        )}
         suppressHydrationWarning
       >
         <AssetsProvider assets={assetsResult}>{children}</AssetsProvider>
