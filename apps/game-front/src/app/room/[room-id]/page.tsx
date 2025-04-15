@@ -2,13 +2,11 @@ import { ControlsQrOverlay } from "@/app/components/controls-qr-overlay";
 import { GameCanvas } from "@/app/components/game";
 
 export interface RoomPageProps {
-  params: {
-    "room-id": string;
-  };
+  params: Promise<{ "room-id": string }>;
 }
 
-export default function RoomPage({ params }: RoomPageProps) {
-  const roomId = params["room-id"];
+export default async function RoomPage({ params }: RoomPageProps) {
+  const { "room-id": roomId } = await params;
 
   return (
     <div className="w-screen h-screen">
