@@ -27,6 +27,9 @@ export const assetsQuery = fragmentOn("Query", {
     track: {
       url: true,
     },
+    vehicle: {
+      url: true,
+    }
   },
 });
 export type QueryType = fragmentOn.infer<typeof assetsQuery>;
