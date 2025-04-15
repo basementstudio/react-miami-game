@@ -2,9 +2,12 @@
   "$schema": "https://turbo.build/schema.json",
   "globalDependencies": [".env", "**/.env.*local", "**/*.tsconfig.json"],
   "tasks": {
-    "build": {
+    "game-schemas#build": {
+      "dependsOn": ["^build"]
+    },
+    "game-front#build": {
       "env": ["BASEHUB_TOKEN", "NEXT_PUBLIC_PARTY_SOCKET_HOST"],
-      "dependsOn": ["build"],
+      "dependsOn": ["game-schemas#build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"]
     },
