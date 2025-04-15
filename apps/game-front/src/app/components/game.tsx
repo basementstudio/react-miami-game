@@ -36,10 +36,10 @@ const controlMap = [
   { name: GameControls.drift, keys: ["Space"] },
 ] satisfies KeyboardControlsEntry<GameControls>[];
 
-function Game() {
+function Game({ roomId }: { roomId: string }) {
   const socket = usePartySocket({
     host: process.env.NEXT_PUBLIC_PARTY_SOCKET_HOST,
-    room: "game-2",
+    room: roomId,
   });
 
   useEffect(() => {
@@ -117,10 +117,10 @@ function Game() {
   );
 }
 
-export function GameCanvas() {
+export function GameCanvas({ roomId }: { roomId: string }) {
   return (
     <Canvas shadows>
-      <Game />
+      <Game roomId={roomId} />
     </Canvas>
   );
 }

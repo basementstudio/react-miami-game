@@ -29,7 +29,13 @@ export const assetsQuery = fragmentOn("Query", {
     },
     vehicle: {
       url: true,
-    }
+    },
+    logo: {
+      url: true,
+    },
+    heroBackground: {
+      url: true,
+    },
   },
 });
 export type QueryType = fragmentOn.infer<typeof assetsQuery>;

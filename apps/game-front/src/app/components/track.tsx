@@ -3,6 +3,7 @@ import { RigidBody } from "@react-three/rapier";
 import { useEffect, useState } from "react";
 import * as THREE from "three";
 import { GLTF } from "three/examples/jsm/Addons.js";
+import { useAssets } from "./assets";
 
 interface TrackGTLF extends GLTF {
   nodes: {
@@ -13,7 +14,8 @@ interface TrackGTLF extends GLTF {
 }
 
 export function Track() {
-  const result = useGLTF("/game-track.glb") as unknown as TrackGTLF;
+  const { models } = useAssets();
+  const result = useGLTF(models.track.url) as unknown as TrackGTLF;
 
   const [trackScene, _] = useState<THREE.Group | null>(result.scene);
   const [collider, setCollider] = useState<THREE.Mesh | null>(null);
@@ -32,9 +34,9 @@ export function Track() {
     <>
       <primitive object={trackScene} />
       <RigidBody type="fixed" colliders="trimesh" restitution={0.3}>
-        <mesh geometry={collider.geometry}>
+        <primitive object={collider}>
           <MeshDiscardMaterial />
-        </mesh>
+        </primitive>
       </RigidBody>
     </>
   );
