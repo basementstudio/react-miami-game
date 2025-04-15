@@ -3,6 +3,7 @@
   "globalDependencies": [".env", "**/.env.*local", "**/*.tsconfig.json"],
   "tasks": {
     "build": {
+      "env": ["BASEHUB_TOKEN", "NEXT_PUBLIC_PARTY_SOCKET_HOST"],
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": [".next/**", "!.next/cache/**"]
