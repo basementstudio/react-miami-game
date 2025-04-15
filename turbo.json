@@ -4,7 +4,7 @@
   "tasks": {
     "build": {
       "env": ["BASEHUB_TOKEN", "NEXT_PUBLIC_PARTY_SOCKET_HOST"],
-      "dependsOn": ["^build"],
+      "dependsOn": ["build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"]
     },
