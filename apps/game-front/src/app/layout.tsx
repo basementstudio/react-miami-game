@@ -6,6 +6,7 @@ import { client } from "@/lib/basehub";
 import { assetsQuery } from "@/lib/basehub";
 import { Toolbar } from "basehub/next-toolbar";
 import { cn } from "@/lib/utils";
+import { OverscrollPrevent } from "./components/utils/overscroll-prevent";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,6 +40,7 @@ export default async function RootLayout({
         )}
         suppressHydrationWarning
       >
+        <OverscrollPrevent />
         <AssetsProvider assets={assetsResult}>{children}</AssetsProvider>
         <Toolbar />
       </body>
