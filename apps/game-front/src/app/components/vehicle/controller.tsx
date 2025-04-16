@@ -17,6 +17,7 @@ import {
   useRapier,
 } from "@react-three/rapier";
 import { forwardRef, useEffect, useMemo, useRef } from "react";
+import mergeRefs from "merge-refs";
 import * as THREE from "three";
 import { GameControls } from "../game";
 import { valueRemap } from "@/lib/math";
@@ -175,7 +176,9 @@ export const CarController = forwardRef<THREE.Group, unknown>(
       controllerVectors.joystickBrake.current = message.data;
     });
 
-    return <CarPhysics vectors={controllerVectors} ref={ref} />;
+    return (
+      <CarPhysics vectors={controllerVectors} ref={mergeRefs(ref, groupRef)} />
+    );
   }
 );
 
