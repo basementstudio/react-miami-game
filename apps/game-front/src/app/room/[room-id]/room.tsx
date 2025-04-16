@@ -9,7 +9,7 @@ export function Room({ roomId }: { roomId: string }) {
   const isMobile = useMedia("(max-width: 1024px)");
 
   return (
-    <div className="w-screen h-screen">
+    <div className="w-screen h-[100svh]">
       <GameCanvas roomId={roomId} />
       {!isMobile && <ControlsQrOverlay />}
       {isMobile && (

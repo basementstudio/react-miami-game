@@ -9,7 +9,7 @@ export default function Home() {
   const { models } = useAssets();
 
   return (
-    <div className="w-screen h-screen flex items-center justify-center bg-[#db2777]">
+    <div className="w-screen h-[100svh] flex items-center justify-center bg-[#db2777]">
       <div className="absolute inset-0 w-full h-full">
         <img
           src={models.heroBackground.url}
