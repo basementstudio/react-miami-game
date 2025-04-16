@@ -7,7 +7,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useParty } from "./use-party";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
-import { CarBody } from "./vehicle/body";
+import { CarBody, MAX_VEHICLE_INSTANCES } from "./vehicle/body";
 import { ServerMessage, type PresenceType } from "game-schemas";
 import { unpackMessage } from "@/lib/pack";
 
@@ -92,9 +92,9 @@ export function OtherPlayers() {
 
   return (
     <>
-      {playerIds.map((id) => (
-        <OtherPlayer key={id} id={id} />
-      ))}
+      {playerIds.map((id, i) =>
+        i < MAX_VEHICLE_INSTANCES - 3 ? <OtherPlayer key={id} id={id} /> : null
+      )}
     </>
   );
 }

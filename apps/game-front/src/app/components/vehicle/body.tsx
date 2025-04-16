@@ -13,7 +13,7 @@ import { createInstance } from "./instances";
 const [CarInstancer, CarInstance] = createInstance();
 const [WheelsInstancer, WheelsInstance] = createInstance();
 
-export const MAX_VEHICLE_INSTANCES = 600;
+export const MAX_VEHICLE_INSTANCES = 800;
 
 export function CarBodyInstancer({ children }: { children: React.ReactNode }) {
   const result = useGLTF("/auto1.glb") as unknown as CarGLTF;
