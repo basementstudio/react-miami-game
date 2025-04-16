@@ -8,7 +8,7 @@ import {
   PerspectiveCamera,
   Sky,
 } from "@react-three/drei";
-import { Suspense, useEffect } from "react";
+import { memo, Suspense, useEffect } from "react";
 import usePartySocket from "partysocket/react";
 import { Player } from "./player";
 import { PartyProvider } from "./use-party";
@@ -117,10 +117,12 @@ function Game({ roomId }: { roomId: string }) {
   );
 }
 
-export function GameCanvas({ roomId }: { roomId: string }) {
+function GameCanvasInner({ roomId }: { roomId: string }) {
   return (
     <Canvas shadows>
       <Game roomId={roomId} />
     </Canvas>
   );
 }
+
+export const GameCanvas = memo(GameCanvasInner);

@@ -5,6 +5,7 @@ import { GameCanvas } from "@/app/components/game";
 import { useMedia } from "@/hooks/use-media";
 import { ControlsMobileOverlay } from "./controls-mobile-overlay";
 import { useEffect, useState } from "react";
+import { ServerStatusOverlay } from "./server-status-overlay";
 
 const useIsMobile = () => {
   const [isMobile, setIsMobile] = useState<boolean | undefined>(undefined);
@@ -35,6 +36,7 @@ export function Room({ roomId }: { roomId: string }) {
   return (
     <div className="w-screen h-[100svh]">
       <GameCanvas roomId={roomId} />
+      <ServerStatusOverlay />
       {!isMobile && <ControlsQrOverlay />}
       {mobileControls && (
         <div className="absolute top-0 left-0 w-full h-full">

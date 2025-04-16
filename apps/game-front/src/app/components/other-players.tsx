@@ -3,20 +3,29 @@
  * Is in charge of syncing presence and player ids
  */
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useParty } from "./use-party";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
 import { CarBody, MAX_VEHICLE_INSTANCES } from "./vehicle/body";
 import { ServerMessage, type PresenceType } from "game-schemas";
 import { unpackMessage } from "@/lib/pack";
+import { create } from "zustand";
 
 const presenceRef = {
   current: {} as Record<string, PresenceType>,
 };
 
+export interface ServerStatusStore {
+  playerIds: string[];
+}
+
+export const useServerStatus = create<ServerStatusStore>(() => ({
+  playerIds: [],
+}));
+
 export function OtherPlayers() {
-  const [playerIds, setPlayerIds] = useState<string[]>([]);
+  const { playerIds } = useServerStatus();
 
   const playerIdsRef = useRef<string[]>([]);
   playerIdsRef.current = playerIds;
@@ -33,13 +42,14 @@ export function OtherPlayers() {
 
       switch (message.type) {
         case "pull-server-presence":
-          console.log("pull-server-presence");
           const allUsers = message.payload.users;
           // remove self from presence update
           delete allUsers[selfId];
 
           const playerKeys = Object.keys(allUsers);
-          setPlayerIds(playerKeys);
+          useServerStatus.setState({
+            playerIds: playerKeys,
+          });
           Object.entries(allUsers).forEach(([id, presence]) => {
             presenceRef.current[id] = presence;
           });
@@ -59,11 +69,12 @@ export function OtherPlayers() {
           break;
         case "player-added":
           if (message.payload.id === party.id) return;
-          console.log("player-added", message.payload.id);
 
-          setPlayerIds((prev) => {
-            if (!prev.includes(message.payload.id)) {
-              return [...prev, message.payload.id];
+          useServerStatus.setState((prev) => {
+            if (!prev.playerIds.includes(message.payload.id)) {
+              return {
+                playerIds: [...prev.playerIds, message.payload.id],
+              };
             }
             return prev;
           });
@@ -72,9 +83,12 @@ export function OtherPlayers() {
 
           break;
         case "player-removed":
-          console.log("player-removed", message.payload.id);
-          setPlayerIds((prev) => {
-            return prev.filter((id) => id !== message.payload.id);
+          useServerStatus.setState((prev) => {
+            return {
+              playerIds: prev.playerIds.filter(
+                (id) => id !== message.payload.id
+              ),
+            };
           });
           delete presenceRef.current[message.payload.id];
           break;

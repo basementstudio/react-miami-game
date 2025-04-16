@@ -154,11 +154,13 @@ export default class GameServer implements Party.Server {
   }
 
   sendPlayerAdded(id: string, presence: PresenceType) {
+    const totalPlayers = [...this.room.getConnections()].length
     const message = {
       type: "player-added",
       payload: {
         id,
         presence,
+        totalPlayers,
       },
     } satisfies PlayerAddedMessageType
     this.sendToAll(packMessage(message, 'string'));
@@ -187,10 +189,13 @@ export default class GameServer implements Party.Server {
 
   onClose(connection: Party.Connection<UserType>) {
 
+    const totalPlayers = [...this.room.getConnections()].length
+
     const message = {
       type: "player-removed",
       payload: {
         id: connection.id,
+        totalPlayers,
       },
     } satisfies PlayerRemovedMessageType
     this.sendToAll(packMessage(message, 'string'));

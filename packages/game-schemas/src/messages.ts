@@ -8,6 +8,7 @@ export const PlayerAddedMessage = z.object({
   payload: z.object({
     id: z.string(),
     presence: PresenceSchema,
+    totalPlayers: z.number(),
   }),
 });
 
@@ -17,6 +18,7 @@ export const PlayerRemovedMessage = z.object({
   type: z.literal("player-removed"),
   payload: z.object({
     id: z.string(),
+    totalPlayers: z.number(),
   }),
 });
 
