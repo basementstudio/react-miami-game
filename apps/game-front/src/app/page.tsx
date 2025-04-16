@@ -23,7 +23,7 @@ export default function Home() {
           className="aspect-video w-full max-w-xl"
           alt="Basement React Miami"
         />
-        <Link href="/room/test">
+        <Link href="/room/miami">
           <Button>Start 🏁</Button>
         </Link>
       </div>
