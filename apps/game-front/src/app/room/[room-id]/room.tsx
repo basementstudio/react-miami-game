@@ -6,6 +6,7 @@ import { useMedia } from "@/hooks/use-media";
 import { ControlsMobileOverlay } from "./controls-mobile-overlay";
 import { ServerStatusOverlay } from "./server-status-overlay";
 import { useIsMobile } from "@/hooks/use-is-mobile";
+import { GithubOverlay } from "./github-overlay";
 
 export function Room({ roomId }: { roomId: string }) {
   const isMobile = useIsMobile();
@@ -18,13 +19,15 @@ export function Room({ roomId }: { roomId: string }) {
   return (
     <div className="w-screen h-[100svh]">
       <GameCanvas roomId={roomId} />
-      <ServerStatusOverlay />
-      {!isMobile && <ControlsQrOverlay />}
+
       {mobileControls && (
         <div className="absolute top-0 left-0 w-full h-full">
           <ControlsMobileOverlay />
         </div>
       )}
+      <ServerStatusOverlay />
+      <GithubOverlay />
+      {!isMobile && <ControlsQrOverlay />}
     </div>
   );
 }

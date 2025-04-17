@@ -37,7 +37,7 @@ export function ControlsQrOverlay() {
   return (
     <>
       <Button
-        className="fixed top-4 right-4 z-10 bg-zinc-800/80 hover:bg-zinc-700/90 text-zinc-200 shadow-md w-10 h-10 p-0 flex items-center justify-center rounded-md border border-zinc-700/50 backdrop-blur-sm"
+        className="fixed bottom-4 right-4 z-10 bg-zinc-800/80 hover:bg-zinc-700/90 text-zinc-200 shadow-md w-10 h-10 p-0 flex items-center justify-center rounded-md border border-zinc-700/50 backdrop-blur-sm"
         onClick={handleOpen}
         variant="ghost"
         size="icon"
