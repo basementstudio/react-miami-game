@@ -6,6 +6,7 @@ import { ArrowBigDown } from "lucide-react";
 import { useCallback, useEffect } from "react";
 import { useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import { Button } from "../ui/button";
 
 interface OrientationControlsProps {
   onAccelerationChange?: (enabled: boolean) => void;
@@ -95,12 +96,9 @@ export function OrientationControls({
     return (
       <div className="flex h-[100svh] items-center justify-center text-center bg-zinc-900 text-white">
         {!deviceOrientationStarted && (
-          <button
-            onClick={requestDeviceOrientation}
-            style={{ marginBottom: "20px", padding: "10px 20px" }}
-          >
-            Enable Controls
-          </button>
+          <Button onClick={requestDeviceOrientation}>
+            Click to enable controls
+          </Button>
         )}
         {deviceOrientationError && (
           <p className="text-red-500 font-bold text-2xl">
@@ -116,7 +114,7 @@ export function OrientationControls({
 
   if (!okOrientation) {
     return (
-      <div className="flex h-[100svh] items-center justify-center text-center bg-zinc-900 text-white">
+      <div className="flex h-[100svh] items-center justify-center text-center bg-zinc-900 text-white p-8">
         <p className="text-red-500 font-bold text-2xl">
           Please rotate your device to landscape mode.
         </p>
@@ -137,7 +135,7 @@ export function OrientationControls({
       {showInclination && (
         <div
           ref={squareRef}
-          className="w-24 h-2 bg-blue-500 ease-out transform rotate-0"
+          className="w-24 h-2 bg-pink-500 ease-out transform rotate-0"
         />
       )}
       <div className="absolute top-0 left-0 w-full h-full flex items-stretch justify-stretch">
@@ -146,7 +144,7 @@ export function OrientationControls({
           onPointerUp={() => setBrake(false)}
           className="w-1/2 h-full flex items-center justify-center"
         >
-          <ArrowBigDown className={cn("w-12 h-12", brake && "text-blue-500")} />
+          <ArrowBigDown className={cn("w-12 h-12", brake && "text-pink-500")} />
         </div>
         <div
           onPointerDown={() => setAcceleration(true)}
@@ -154,7 +152,7 @@ export function OrientationControls({
           className="w-1/2 h-full flex items-center justify-center"
         >
           <ArrowBigUp
-            className={cn("w-12 h-12", acceleration && "text-blue-500")}
+            className={cn("w-12 h-12", acceleration && "text-pink-500")}
           />
         </div>
       </div>
