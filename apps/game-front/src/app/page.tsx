@@ -27,6 +27,26 @@ export default function Home() {
           <Button>Start 🏁</Button>
         </Link>
       </div>
+      <link
+        rel="preload"
+        crossOrigin="anonymous"
+        as="fetch"
+        href={models.vehicle.url}
+      />
+      <link
+        rel="preload"
+        crossOrigin="anonymous"
+        as="fetch"
+        href={models.track.url}
+      />
+      <link
+        rel="preload"
+        crossOrigin="anonymous"
+        as="fetch"
+        href={
+          "https://raw.githubusercontent.com/pmndrs/drei-assets/456060a26bbeb8fdf79326f224b6d99b8bcce736/hdri/venice_sunset_1k.hdr"
+        }
+      />
     </div>
   );
 }
