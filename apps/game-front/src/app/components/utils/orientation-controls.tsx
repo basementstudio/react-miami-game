@@ -115,8 +115,8 @@ export function OrientationControls({
   if (!okOrientation) {
     return (
       <div className="flex h-[100svh] items-center justify-center text-center bg-zinc-900 text-white p-8">
-        <p className="text-red-500 font-bold text-2xl">
-          Please rotate your device to landscape mode.
+        <p className="text-pink-500 font-bold text-2xl text-balance">
+          Rotate your device to landscape mode.
         </p>
       </div>
     );
