@@ -19,7 +19,7 @@ import {
 import { forwardRef, useEffect, useMemo, useRef } from "react";
 import mergeRefs from "merge-refs";
 import * as THREE from "three";
-import { GameControls } from "../game";
+import { GameControls, useGame } from "../game";
 import { valueRemap } from "@/lib/math";
 import { clamp, degToRad } from "three/src/math/MathUtils.js";
 import {
@@ -366,6 +366,8 @@ export const CarPhysics = forwardRef<THREE.Group, CarPhysicsProps>(
       return vectorA;
     };
 
+    const debug = useGame((s) => s.debug);
+
     useAfterPhysicsStep(() => {
       const now = performance.now();
       const d = now - prevTimestamp.current;
@@ -401,7 +403,7 @@ export const CarPhysics = forwardRef<THREE.Group, CarPhysicsProps>(
       vectors.wheelRotation.current -= (speed.current / 10) * delta * 100;
 
       // camera
-      if (true) {
+      if (!debug) {
         // update lookat
         CAMERA.cameraTargetLookat
           .copy(CAMERA.lookAtOffset)

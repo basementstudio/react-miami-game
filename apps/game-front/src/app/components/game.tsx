@@ -19,6 +19,8 @@ import { packMessage } from "@/lib/pack";
 import { Track } from "./track";
 import { CarBodyInstancer } from "./vehicle/body";
 import { GradientBackground } from "./gradient";
+import { create } from "zustand";
+import { WasdControls } from "./wasd-controls";
 
 export enum GameControls {
   forward = "forward",
@@ -36,11 +38,29 @@ const controlMap = [
   { name: GameControls.drift, keys: ["Space"] },
 ] satisfies KeyboardControlsEntry<GameControls>[];
 
+interface GameStore {
+  debug: boolean;
+}
+
+export const useGame = create<GameStore>(() => ({
+  debug: false,
+}));
+
 function Game({ roomId }: { roomId: string }) {
+  const debug = useGame((s) => s.debug);
+
   const socket = usePartySocket({
     host: process.env.NEXT_PUBLIC_PARTY_SOCKET_HOST,
     room: roomId,
   });
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const urlParams = new URLSearchParams(window.location.search);
+
+    const debug = urlParams.has("debug");
+    if (debug) useGame.setState({ debug: true });
+  }, []);
 
   useEffect(() => {
     const initPlayer: InitUserActionType = {
@@ -87,7 +107,7 @@ function Game({ roomId }: { roomId: string }) {
             <Ground />
             <Track />
           </Suspense>
-          <GradientBackground colorA="#c4c2ff" colorB="#ffbdb3" />
+          <GradientBackground colorA="#d1d0ff" colorB="#ffd5cf" />
           <Environment frames={2} preset="sunset">
             <mesh
               receiveShadow
@@ -99,6 +119,7 @@ function Game({ roomId }: { roomId: string }) {
             </mesh>
           </Environment>
         </PartyProvider>
+        {debug && <WasdControls />}
       </KeyboardControls>
     </Physics>
   );
@@ -106,7 +127,7 @@ function Game({ roomId }: { roomId: string }) {
 
 function GameCanvasInner({ roomId }: { roomId: string }) {
   return (
-    <Canvas shadows>
+    <Canvas dpr={[1, 1.5]}>
       <Game roomId={roomId} />
     </Canvas>
   );

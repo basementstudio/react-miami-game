@@ -11,7 +11,6 @@ export function GradientBackground({ colorA = "#ff5f6d", colorB = "#ffc371" }) {
     <mesh>
       <cylinderGeometry args={[100, 100, 100, 16, 16, true]} />
       <shaderMaterial
-        transparent
         side={THREE.BackSide}
         uniforms={uniforms}
         vertexShader={`
@@ -27,7 +26,7 @@ export function GradientBackground({ colorA = "#ff5f6d", colorB = "#ffc371" }) {
           varying vec2 vUv;
           
           void main() {
-            gl_FragColor = vec4(mix(colorA, colorB, vUv.y), 0.5);
+            gl_FragColor = vec4(mix(colorA, colorB, vUv.y), 1.);
           }
         `}
       />
