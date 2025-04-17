@@ -6,7 +6,6 @@ import {
   KeyboardControls,
   KeyboardControlsEntry,
   PerspectiveCamera,
-  Sky,
 } from "@react-three/drei";
 import { memo, Suspense, useEffect } from "react";
 import usePartySocket from "partysocket/react";
@@ -19,6 +18,7 @@ import { InitUserActionType } from "game-schemas";
 import { packMessage } from "@/lib/pack";
 import { Track } from "./track";
 import { CarBodyInstancer } from "./vehicle/body";
+import { GradientBackground } from "./gradient";
 
 export enum GameControls {
   forward = "forward",
@@ -87,21 +87,8 @@ function Game({ roomId }: { roomId: string }) {
             <Ground />
             <Track />
           </Suspense>
-          <Sky
-            distance={450000}
-            sunPosition={[1, 0.1, 0]}
-            inclination={1}
-            azimuth={0.4}
-            rayleigh={2.722}
-          />
-          <Environment frames={2}>
-            <Sky
-              distance={450000}
-              sunPosition={[1, 0.1, 0]}
-              inclination={1}
-              azimuth={0.4}
-              rayleigh={2.722}
-            />
+          <GradientBackground colorA="#c4c2ff" colorB="#ffbdb3" />
+          <Environment frames={2} preset="sunset">
             <mesh
               receiveShadow
               position={[0, -0.5, 0]}

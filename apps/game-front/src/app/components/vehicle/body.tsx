@@ -3,35 +3,87 @@
 /** Inspired by https://github.com/isaac-mason/sketches/blob/main/sketches/rapier/arcade-vehicle-controller/src/sketch.tsx */
 
 import { useFrame } from "@react-three/fiber";
-import { forwardRef, useRef } from "react";
+import { forwardRef, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { WHEEL } from "./constants";
-import { useGLTF } from "@react-three/drei";
+import { useGLTF, useTexture } from "@react-three/drei";
 import { GLTF } from "three/examples/jsm/Addons.js";
 import { createInstance } from "./instances";
+import { useAssets } from "../assets";
+import { useIsMobile } from "@/hooks/use-is-mobile";
 
 const [CarInstancer, CarInstance] = createInstance();
 const [WheelsInstancer, WheelsInstance] = createInstance();
 
 export const MAX_VEHICLE_INSTANCES = 800;
 
+interface CarGLTF extends GLTF {
+  nodes: {
+    Body: THREE.Mesh;
+    antena: THREE.Mesh;
+    wheel: THREE.Mesh;
+  };
+}
+
 export function CarBodyInstancer({ children }: { children: React.ReactNode }) {
-  const result = useGLTF("/auto1.glb") as unknown as CarGLTF;
+  const {
+    models: { vehicle, bodyMobile },
+  } = useAssets();
+
+  const mobileTexture = useTexture(bodyMobile.url);
+  const { nodes } = useGLTF(vehicle.url) as unknown as CarGLTF;
+
+  const {
+    bodyMaterialHigh,
+    bodyMaterialLow,
+    wheelMaterialHigh,
+    wheelMaterialLow,
+  } = useMemo(() => {
+    mobileTexture.colorSpace = THREE.SRGBColorSpace;
+    mobileTexture.flipY = false;
+    mobileTexture.anisotropy = 8;
+
+    const bodyMaterialHigh = (
+      nodes.Body.material as THREE.MeshStandardMaterial
+    ).clone();
+
+    const bodyMaterialLow = new THREE.MeshBasicMaterial({
+      map: mobileTexture,
+    });
+
+    const wheelMaterialHigh = (
+      nodes.wheel.material as THREE.MeshStandardMaterial
+    ).clone();
+
+    const wheelMaterialLow = new THREE.MeshBasicMaterial({
+      map: mobileTexture,
+    });
+
+    return {
+      bodyMaterialHigh,
+      bodyMaterialLow,
+      wheelMaterialHigh,
+      wheelMaterialLow,
+    };
+  }, [nodes, mobileTexture]);
+
+  const isMobile = useIsMobile();
+  if (typeof isMobile === "undefined") return null;
 
   return (
     <group>
       <CarInstancer
         frustumCulled={false}
         count={MAX_VEHICLE_INSTANCES}
-        geometry={result.nodes.Body.geometry}
+        geometry={nodes.Body.geometry}
+        material={isMobile ? bodyMaterialLow : bodyMaterialHigh}
       >
-        <meshStandardMaterial color="#323232" roughness={0} metalness={1} />
         <WheelsInstancer
           frustumCulled={false}
           count={MAX_VEHICLE_INSTANCES * 4}
-          geometry={result.nodes.wheel.geometry}
+          geometry={nodes.wheel.geometry}
+          material={isMobile ? wheelMaterialLow : wheelMaterialHigh}
         >
-          <meshStandardMaterial color="#000000" roughness={0.8} />
           {children}
         </WheelsInstancer>
       </CarInstancer>
@@ -72,14 +124,6 @@ const wheels = [
   },
 ];
 
-interface CarGLTF extends GLTF {
-  nodes: {
-    Body: THREE.Mesh;
-    antena: THREE.Mesh;
-    wheel: THREE.Mesh;
-  };
-}
-
 export interface VehicleVectors {
   wheelRotation: { current: number };
   visibleSteering: { current: number };
@@ -94,7 +138,7 @@ export const CarBody = forwardRef<THREE.Group, { v: VehicleVectors }>(
         if (!wheel) return;
 
         wheel.rotation.order = "YXZ";
-        wheel.rotation.x = v.wheelRotation.current;
+        wheel.rotation.x = v.wheelRotation.current * 0.2;
       });
 
       wheelsRef.current[1]!.rotation.y = v.visibleSteering.current * 0.5;

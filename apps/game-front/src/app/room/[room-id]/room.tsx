@@ -4,26 +4,8 @@ import { ControlsQrOverlay } from "@/app/room/[room-id]/controls-qr-overlay";
 import { GameCanvas } from "@/app/components/game";
 import { useMedia } from "@/hooks/use-media";
 import { ControlsMobileOverlay } from "./controls-mobile-overlay";
-import { useEffect, useState } from "react";
 import { ServerStatusOverlay } from "./server-status-overlay";
-
-const useIsMobile = () => {
-  const [isMobile, setIsMobile] = useState<boolean | undefined>(undefined);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const isTouchDevice =
-      "ontouchstart" in window ||
-      navigator.maxTouchPoints > 0 ||
-      // @ts-expect-error - IE11
-      navigator.msMaxTouchPoints > 0;
-
-    setIsMobile(isTouchDevice);
-  }, []);
-
-  return isMobile;
-};
+import { useIsMobile } from "@/hooks/use-is-mobile";
 
 export function Room({ roomId }: { roomId: string }) {
   const isMobile = useIsMobile();

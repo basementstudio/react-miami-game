@@ -47,7 +47,7 @@ const joysticRemapTo = 0.04;
 const CAMERA = {
   positionOffset: new THREE.Vector3(0, 0.3, 0.8),
   lookAtOffset: new THREE.Vector3(0, 0, -2),
-  // positionOffset: new THREE.Vector3(0.1, 0.1, -0.2).multiplyScalar(2),
+  // positionOffset: new THREE.Vector3(1, 0.1, -0.2),
   // lookAtOffset: new THREE.Vector3(0, 0.05, 0),
   cameraTargetPosition: new THREE.Vector3(0, 0, 0),
   cameraTargetLookat: new THREE.Vector3(),
@@ -394,7 +394,7 @@ export const CarPhysics = forwardRef<THREE.Group, CarPhysicsProps>(
         groupRef.current.quaternion,
         "YXZ"
       );
-      bodyEuler.y = bodyEuler.y + driftSteeringVisualAngle.current * 0.4;
+      bodyEuler.y = bodyEuler.y + driftSteeringVisualAngle.current * 0.35;
       groupRef.current.rotation.copy(bodyEuler);
 
       // wheel rotation

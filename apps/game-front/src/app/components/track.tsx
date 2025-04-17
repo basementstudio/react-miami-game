@@ -21,6 +21,15 @@ export function Track() {
   const [collider, setCollider] = useState<THREE.Mesh | null>(null);
 
   useEffect(() => {
+    Object.values(result.nodes).forEach((node) => {
+      if (node.material) {
+        const mat = node.material as THREE.MeshStandardMaterial;
+        if (mat.map && mat.map.anisotropy) {
+          mat.map.anisotropy = 16;
+        }
+      }
+    });
+
     const colliderMesh = result.scene.getObjectByName("collider");
     if (colliderMesh) {
       colliderMesh.removeFromParent();

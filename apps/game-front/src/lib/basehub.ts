@@ -36,6 +36,9 @@ export const assetsQuery = fragmentOn("Query", {
     heroBackground: {
       url: true,
     },
+    bodyMobile: {
+      url: true,
+    },
   },
 });
 export type QueryType = fragmentOn.infer<typeof assetsQuery>;
