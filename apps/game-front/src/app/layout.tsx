@@ -4,7 +4,6 @@ import "./globals.css";
 import { AssetsProvider } from "./components/assets";
 import { client } from "@/lib/basehub";
 import { assetsQuery } from "@/lib/basehub";
-import { Toolbar } from "basehub/next-toolbar";
 import { cn } from "@/lib/utils";
 import { OverscrollPrevent } from "./components/utils/overscroll-prevent";
 
@@ -42,7 +41,6 @@ export default async function RootLayout({
       >
         <OverscrollPrevent />
         <AssetsProvider assets={assetsResult}>{children}</AssetsProvider>
-        <Toolbar />
       </body>
     </html>
   );
