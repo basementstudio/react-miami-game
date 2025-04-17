@@ -6,6 +6,7 @@ import { client } from "@/lib/basehub";
 import { assetsQuery } from "@/lib/basehub";
 import { cn } from "@/lib/utils";
 import { OverscrollPrevent } from "./components/utils/overscroll-prevent";
+import { Analytics } from "@vercel/analytics/react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -41,6 +42,7 @@ export default async function RootLayout({
       >
         <OverscrollPrevent />
         <AssetsProvider assets={assetsResult}>{children}</AssetsProvider>
+        <Analytics />
       </body>
     </html>
   );

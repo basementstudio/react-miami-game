@@ -14,6 +14,7 @@
     "@react-three/rapier": "^2.1.0",
     "@shadcn/ui": "^0.0.4",
     "@types/three": "^0.175.0",
+    "@vercel/analytics": "^1.5.0",
     "basehub": "^8.1.32",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -25,6 +26,7 @@
     "next": "15.2.4",
     "partysocket": "^1.1.3",
     "peerjs": "^1.5.4",
+    "peerjs-react": "workspace:*",
     "qrcode.react": "^4.2.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -32,8 +34,7 @@
     "three": "^0.175.0",
     "tw-animate-css": "^1.2.5",
     "zod": "^3.24.2",
-    "zustand": "^5.0.3",
-    "peerjs-react": "workspace:*"
+    "zustand": "^5.0.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
