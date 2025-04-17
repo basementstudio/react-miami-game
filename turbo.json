@@ -8,7 +8,7 @@
     },
     "game-front#build": {
       "env": ["BASEHUB_TOKEN", "NEXT_PUBLIC_PARTY_SOCKET_HOST"],
-      "dependsOn": ["game-schemas#build"],
+      "dependsOn": ["game-schemas#build", "peerjs-react#build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"]
     },

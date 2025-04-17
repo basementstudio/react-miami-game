@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
+import dts from 'vite-plugin-dts'
 
 export default defineConfig({
   build: {
@@ -10,16 +11,18 @@ export default defineConfig({
       fileName: (format) => `index.${format === 'es' ? 'js' : 'cjs'}`
     },
     rollupOptions: {
-      external: ['react', 'peerjs', 'eventemitter3'],
+      external: ['react', 'peerjs'],
       output: {
         globals: {
           react: 'React',
-          peerjs: 'Peer',
-          eventemitter3: 'EventEmitter'
+          peerjs: 'Peer'
         }
       }
     },
     sourcemap: true,
-    minify: false
-  }
+    minify: true
+  },
+  plugins: [
+    dts()
+  ]
 }); 
