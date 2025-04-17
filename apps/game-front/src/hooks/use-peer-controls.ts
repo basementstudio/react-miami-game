@@ -1,4 +1,4 @@
-import { createPeerParty } from "@/peer-party";
+import { createPeerParty } from "peerjs-react";
 
 type ControlsMessage = {
   "steeringAngle": number;
